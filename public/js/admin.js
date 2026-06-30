@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDeleteConfirmation();
   initAutoSave();
   initRichTextEditor();
+  checkCompiledNewsletterData();
 });
 
 /* ---------- Sidebar Toggle (Mobile) ---------- */
@@ -211,12 +212,12 @@ function populateEditorFields(data) {
   // Populate inline image placeholders
   if (data.content) {
     setTimeout(() => {
-      renderInlineImagePlaceholders(data.content);
+      renderInlineImagePlaceholders(data.content, data.resolvedImages || []);
     }, 100);
   }
 }
 
-function renderInlineImagePlaceholders(htmlContent) {
+function renderInlineImagePlaceholders(htmlContent, resolvedImages = []) {
   const container = document.getElementById('inlineImagesContainer');
   const card = document.getElementById('inlineImagesCard');
   if (!container || !card) return;
@@ -275,6 +276,15 @@ function renderInlineImagePlaceholders(htmlContent) {
     const hiddenInput = slot.querySelector('.inline-resolved-path');
     const previewContainer = slot.querySelector('.inline-preview-container');
     const previewImg = slot.querySelector('.inline-preview-container img');
+
+    // Pre-populate if we have a pre-resolved image for this slot (from newsletter digest compiler)
+    const matchingResolved = resolvedImages.find(img => img.slotId === parseInt(id));
+    if (matchingResolved) {
+      hiddenInput.value = matchingResolved.url;
+      previewImg.src = matchingResolved.url;
+      previewContainer.style.display = 'block';
+      input.value = matchingResolved.url;
+    }
 
     btn.addEventListener('click', async () => {
       const url = input.value.trim();
@@ -857,5 +867,51 @@ function initRichTextEditor() {
       height: 400,
       removePlugins: 'about,forms,iframe'
     });
+  }
+}
+
+/* ---------- Check Compiled Newsletter Data ---------- */
+function checkCompiledNewsletterData() {
+  const newsletterDataRaw = sessionStorage.getItem('newsletter_data');
+  if (!newsletterDataRaw) return;
+
+  try {
+    const data = JSON.parse(newsletterDataRaw);
+    
+    // Clear immediately to prevent reloading populating it again
+    sessionStorage.removeItem('newsletter_data');
+
+    // Populate editor fields
+    populateEditorFields(data);
+
+    // Show editor, hide AI processing raw input
+    const aiSection = document.querySelector('.ai-section');
+    if (aiSection) aiSection.style.display = 'none';
+
+    const editorFields = document.querySelector('.editor-fields');
+    if (editorFields) editorFields.style.display = 'block';
+
+    // Populate cover image preview
+    if (data.cover_image) {
+      const coverInput = document.getElementById('coverImage');
+      if (coverInput) coverInput.value = data.cover_image;
+
+      const preview = document.querySelector('.image-preview');
+      if (preview) {
+        let img = preview.querySelector('img');
+        if (!img) {
+          img = document.createElement('img');
+          preview.appendChild(img);
+        }
+        img.src = data.cover_image;
+        img.alt = 'Bülten Kapak Görseli';
+        preview.classList.add('visible');
+      }
+    }
+
+    showNotification('AI bülten derlemesi başarıyla yüklendi! Lütfen kontrol edin.', 'success');
+
+  } catch (error) {
+    console.error('Error parsing compiled newsletter data:', error);
   }
 }

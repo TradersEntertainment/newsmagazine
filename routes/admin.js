@@ -55,6 +55,11 @@ router.get('/haberler', (req, res) => {
   res.render('admin/articles', { articles });
 });
 
+// Render newsletter digest compiler form
+router.get('/bulten-olustur', (req, res) => {
+  res.render('admin/newsletter');
+});
+
 // New article form
 router.get('/haberler/yeni', (req, res) => {
   res.render('admin/editor', { article: null });

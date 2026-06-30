@@ -67,9 +67,35 @@ async function scrapeUrl(url) {
     // Get document title
     const pageTitle = $('title').text().trim();
 
+    // Extract metadata image (og:image)
+    let ogImage = $('meta[property="og:image"]').attr('content') || 
+                  $('meta[name="twitter:image"]').attr('content') ||
+                  $('meta[name="og:image"]').attr('content');
+    
+    // If not found, try to find the first large image inside article tags
+    if (!ogImage) {
+      const img = $('article img, .article img, .post img, main img').first();
+      if (img.length > 0) {
+        ogImage = img.attr('src');
+      }
+    }
+
+    // Resolve relative URL if needed
+    if (ogImage && !ogImage.startsWith('http://') && !ogImage.startsWith('https://')) {
+      try {
+        const urlModule = require('url');
+        const parsed = urlModule.parse(url);
+        const host = `${parsed.protocol}//${parsed.host}`;
+        ogImage = new URL(ogImage, host).toString();
+      } catch (e) {
+        // Ignore resolution error
+      }
+    }
+
     return {
       title: pageTitle,
-      text: mainContent.trim()
+      text: mainContent.trim(),
+      cover_image: ogImage || null
     };
   } catch (error) {
     console.error('Scraping error:', error.message);

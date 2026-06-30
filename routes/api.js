@@ -6,7 +6,7 @@ const fs = require('fs');
 const http = require('http');
 const https = require('https');
 const urlModule = require('url');
-const { processContent } = require('../services/groq');
+const { processContent, processNewsletterContent } = require('../services/groq');
 const { scrapeUrl } = require('../services/scraper');
 const sharp = require('sharp');
 
@@ -141,10 +141,11 @@ router.post('/ai/process', async (req, res) => {
 
   try {
     let textToProcess = rawInput;
+    let scraped = null;
 
     if (isUrl) {
       console.log(`[Scraper] URL algılandı. İçerik çekiliyor: ${rawInput}`);
-      const scraped = await scrapeUrl(rawInput);
+      scraped = await scrapeUrl(rawInput);
       if (!scraped.text || scraped.text.length < 50) {
         throw new Error('Web sayfasından anlamlı bir metin içeriği çekilemedi. Lütfen ham metni kopyalayıp yapıştırın.');
       }
@@ -154,16 +155,10 @@ router.post('/ai/process', async (req, res) => {
     console.log('[AI] Groq ile içerik işleniyor...');
     const result = await processContent(textToProcess);
 
-    // Resolve cover image from image_keywords and download it locally
-    if (result.image_keywords) {
-      const keywordList = result.image_keywords.split(',').map(k => k.trim().toLowerCase()).filter(Boolean);
-      let primaryKeyword = keywordList[0] || 'finance';
-      primaryKeyword = primaryKeyword.replace(/[^a-z0-9]/g, '');
-      
-      const dynamicCoverUrl = `https://loremflickr.com/800/600/${primaryKeyword}`;
-      console.log(`[Image Resolver] Kapak görseli çözümleniyor: ${dynamicCoverUrl}`);
-      const staticUrl = await resolveStaticImageUrl(dynamicCoverUrl);
-      result.cover_image = await downloadAndSaveAsWebP(staticUrl);
+    // Resolve cover image from the scraped article metadata if available (avoid random fallbacks)
+    if (scraped && scraped.cover_image) {
+      console.log(`[Image Resolver] Kaynak sayfadan çekilen kapak görseli yerelleştiriliyor: ${scraped.cover_image}`);
+      result.cover_image = await downloadAndSaveAsWebP(scraped.cover_image);
     } else {
       result.cover_image = null;
     }
@@ -176,6 +171,78 @@ router.post('/ai/process', async (req, res) => {
     return res.json({ success: true, data: result });
   } catch (error) {
     console.error('AI işleme hatası:', error.message);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// AI newsletter processing endpoint (compiles multiple URLs)
+router.post('/ai/process-newsletter', async (req, res) => {
+  const { urls } = req.body; // array of urls
+
+  if (!urls || !Array.isArray(urls) || urls.filter(Boolean).length === 0) {
+    return res.status(400).json({ success: false, message: 'En az bir haber linki girilmelidir.' });
+  }
+
+  const activeUrls = urls.filter(url => url && url.trim().startsWith('http'));
+  console.log(`[Newsletter Compiler] ${activeUrls.length} adet haber linki işleniyor...`);
+
+  try {
+    const scrapedArticles = [];
+    const scrapedImages = []; // will store paths of downloaded images
+
+    // 1. Scrape all articles
+    for (let i = 0; i < activeUrls.length; i++) {
+      const url = activeUrls[i];
+      try {
+        console.log(`[Newsletter Compiler] Kazınıyor (${i + 1}/${activeUrls.length}): ${url}`);
+        const scraped = await scrapeUrl(url);
+        if (scraped && scraped.text && scraped.text.length > 50) {
+          let localImageUrl = null;
+          if (scraped.cover_image) {
+            console.log(`[Newsletter Compiler] Kaynak görsel yerelleştiriliyor: ${scraped.cover_image}`);
+            localImageUrl = await downloadAndSaveAsWebP(scraped.cover_image);
+          }
+          
+          scrapedArticles.push({
+            url,
+            title: scraped.title,
+            text: scraped.text,
+            cover_image: localImageUrl
+          });
+
+          if (localImageUrl) {
+            scrapedImages.push({ slotId: i + 1, url: localImageUrl });
+          }
+        }
+      } catch (err) {
+        console.warn(`[Newsletter Compiler] Link kazınamadı, atlanıyor: ${url}. Hata: ${err.message}`);
+      }
+    }
+
+    if (scrapedArticles.length === 0) {
+      throw new Error('Girilen linklerin hiçbirinden geçerli haber içeriği çekilemedi.');
+    }
+
+    // 2. Compile text for Groq
+    const combinedText = scrapedArticles.map((art, idx) => {
+      return `Haber #${idx + 1}:\nBaşlık: ${art.title}\nKaynak Linki: ${art.url}\nİçerik:\n${art.text}`;
+    }).join('\n\n---\n\n');
+
+    console.log('[Newsletter Compiler] Groq AI ile bülten derleniyor...');
+    const result = await processNewsletterContent(combinedText);
+
+    // 3. Pre-fill newsletter cover image with the first scraped article's image if available
+    result.cover_image = scrapedArticles[0]?.cover_image || null;
+
+    // 4. Return result and resolved slot images
+    return res.json({
+      success: true,
+      data: result,
+      resolvedImages: scrapedImages
+    });
+
+  } catch (error) {
+    console.error('Bülten işleme hatası:', error.message);
     return res.status(500).json({ success: false, message: error.message });
   }
 });
