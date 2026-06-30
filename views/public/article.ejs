@@ -306,7 +306,7 @@
     </div>
   <% } %>
   
-  <div style="font-size: 15px; line-height: 1.6; color: #333; margin-bottom: 30px; font-weight: 400;">
+  <div class="card-description-block" style="font-size: 15px; line-height: 1.6; color: #333; margin-bottom: 30px; font-weight: 400;">
     <%= article.excerpt || (article.content ? truncate(article.content.replace(/<[^>]*>/g, ''), 250) : '') %>
   </div>
   
@@ -335,7 +335,7 @@
     </div>
   <% } %>
   
-  <div style="font-size: 15px; line-height: 1.6; color: #E2E8F0; margin-bottom: 30px; font-weight: 400;">
+  <div class="card-description-block" style="font-size: 15px; line-height: 1.6; color: #E2E8F0; margin-bottom: 30px; font-weight: 400;">
     <%= article.excerpt || (article.content ? truncate(article.content.replace(/<[^>]*>/g, ''), 250) : '') %>
   </div>
   
@@ -350,7 +350,7 @@
   <span style="font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 900; letter-spacing: 2px; color: #1A1A1A; display: block; margin-bottom: 40px;">EURO<span style="color: #C53030;">POLITIKA</span></span>
   
   <div style="font-size: 72px; font-family: 'Playfair Display', serif; color: #C53030; line-height: 0.1; margin-bottom: 10px; font-weight: 900;">“</div>
-  <div style="font-family: 'Playfair Display', serif; font-size: 22px; font-style: italic; line-height: 1.6; color: #1A1A1A; margin-bottom: 40px; font-weight: 600; padding: 0 10px;">
+  <div class="card-description-block" style="font-family: 'Playfair Display', serif; font-size: 22px; font-style: italic; line-height: 1.6; color: #1A1A1A; margin-bottom: 40px; font-weight: 600; padding: 0 10px;">
     <%= article.excerpt || (article.content ? truncate(article.content.replace(/<[^>]*>/g, ''), 150) : '') %>
   </div>
   
@@ -395,6 +395,63 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // Automatically detect if this is a newsletter digest (Bülten)
+    const isDigest = '<%= article.category %>' === 'Bülten' || 
+                     document.querySelectorAll('.article-content h2, .article-content h3').length >= 2 ||
+                     '<%= article.title %>'.toLowerCase().includes('bülten') ||
+                     '<%= article.title %>'.toLowerCase().includes('digest');
+    
+    if (isDigest) {
+      // Extract subheadings (excluding image placeholder text)
+      const subheadings = Array.from(document.querySelectorAll('.article-content h2, .article-content h3'))
+        .map(el => el.textContent.trim())
+        .filter(text => text.length > 0 && !text.includes('Görsel Alanı') && !text.includes('Görsel Slotu'));
+      
+      if (subheadings.length > 0) {
+        console.log('[Digest Share Card] Bülten konuları tespit edildi:', subheadings);
+        
+        // Generate Classic list HTML
+        const classicListHtml = `
+          <div style="margin-top: 15px; margin-bottom: 25px; text-align: left;">
+            <div style="font-size: 11px; font-weight: 700; color: #C53030; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif;">BÜLTEN İÇERİĞİ</div>
+            <ul style="margin: 0; padding-left: 20px; list-style-type: square; color: #1A1A1A; font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; line-height: 1.5; display: flex; flex-direction: column; gap: 8px;">
+              ${subheadings.map(sub => `<li>${sub}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+
+        // Generate Dark list HTML
+        const darkListHtml = `
+          <div style="margin-top: 15px; margin-bottom: 25px; text-align: left;">
+            <div style="font-size: 11px; font-weight: 700; color: #D69E2E; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif;">BÜLTEN İÇERİĞİ</div>
+            <ul style="margin: 0; padding-left: 20px; list-style-type: square; color: #FFFFFF; font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; line-height: 1.5; display: flex; flex-direction: column; gap: 8px;">
+              ${subheadings.map(sub => `<li>${sub}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+
+        // Generate Quote list HTML (centered, clean)
+        const quoteListHtml = `
+          <div style="margin-top: 15px; margin-bottom: 25px; text-align: center;">
+            <div style="font-size: 11px; font-weight: 700; color: #C53030; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 16px; font-family: 'Inter', sans-serif;">BÜLTEN KONULARI</div>
+            <ul style="margin: 0; padding: 0; list-style-type: none; color: #1A1A1A; font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; font-style: italic; line-height: 1.6; display: flex; flex-direction: column; gap: 10px; align-items: center;">
+              ${subheadings.map(sub => `<li>• ${sub}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+
+        // Replace the description blocks in templates
+        const classicDesc = document.querySelector('#shareCardTemplate .card-description-block');
+        if (classicDesc) classicDesc.innerHTML = classicListHtml;
+
+        const darkDesc = document.querySelector('#shareCardTemplateDark .card-description-block');
+        if (darkDesc) darkDesc.innerHTML = darkListHtml;
+
+        const quoteDesc = document.querySelector('#shareCardTemplateQuote .card-description-block');
+        if (quoteDesc) quoteDesc.innerHTML = quoteListHtml;
+      }
+    }
+
     // Select all trigger buttons (both the inline one and the floating desktop one)
     const triggerButtons = document.querySelectorAll('#btnShareAsImage, .btnShareAsImage');
     const modal = document.getElementById('sharePreviewModal');
