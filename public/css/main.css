@@ -1264,3 +1264,126 @@ img {
     display: none; /* Hide sidebars on smaller screens */
   }
 }
+
+/* --- Premium Reading Typography & Headings --- */
+.article-detail .article-title {
+  font-size: 38px;
+  line-height: 1.25;
+  margin-bottom: 24px;
+}
+.article-content {
+  font-size: 19px;
+  line-height: 1.85;
+  color: #2D3748;
+}
+.article-content p {
+  font-size: 19px;
+  line-height: 1.85;
+  margin-bottom: 24px;
+  color: #2D3748;
+}
+.article-content h2 {
+  font-size: 28px;
+  margin-top: 48px;
+  margin-bottom: 20px;
+  color: #1A1A1A;
+}
+.article-content h3 {
+  font-size: 22px;
+  margin-top: 36px;
+  margin-bottom: 16px;
+  color: #1A1A1A;
+}
+
+/* --- Dark Mode Stylesheet Overrides --- */
+[data-theme="dark"] {
+  background-color: #121212;
+  color: #E2E8F0;
+}
+[data-theme="dark"] body {
+  background-color: #121212;
+  color: #E2E8F0;
+}
+[data-theme="dark"] .site-header {
+  background: rgba(18, 18, 18, 0.98);
+  border-bottom-color: #2D3748;
+}
+[data-theme="dark"] .site-logo {
+  color: #F7FAFC;
+}
+[data-theme="dark"] .article-detail {
+  border-left-color: #2D3748;
+  border-right-color: #2D3748;
+}
+[data-theme="dark"] .sidebar-widget {
+  background: #1E1E1E;
+  border-color: #2D3748;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+[data-theme="dark"] .ticker-item {
+  border-bottom-color: #2D3748;
+}
+[data-theme="dark"] .ticker-label {
+  color: #A0AEC0;
+}
+[data-theme="dark"] .ticker-value {
+  color: #F7FAFC;
+}
+[data-theme="dark"] .agenda-list li {
+  color: #A0AEC0;
+  border-left-color: #2D3748;
+}
+[data-theme="dark"] .rec-title {
+  color: #F7FAFC;
+}
+[data-theme="dark"] .rec-card img {
+  border-color: #2D3748;
+}
+[data-theme="dark"] .article-card {
+  background: #1E1E1E;
+  border-color: #2D3748;
+}
+[data-theme="dark"] .article-card-content h3 a {
+  color: #F7FAFC;
+}
+[data-theme="dark"] .article-card-content p {
+  color: #A0AEC0;
+}
+[data-theme="dark"] .card-image-wrapper {
+  border-bottom-color: #2D3748;
+}
+[data-theme="dark"] .article-meta {
+  color: #718096;
+}
+[data-theme="dark"] .article-content {
+  color: #E2E8F0;
+}
+[data-theme="dark"] .article-content p {
+  color: #E2E8F0;
+}
+[data-theme="dark"] .article-content h2,
+[data-theme="dark"] .article-content h3 {
+  color: #F7FAFC;
+}
+[data-theme="dark"] blockquote {
+  background: #1A1A1A;
+  border-left-color: #C53030;
+  color: #CBD5E0;
+}
+[data-theme="dark"] #sharePreviewModal {
+  background: rgba(0,0,0,0.9) !important;
+}
+[data-theme="dark"] #sharePreviewModal div {
+  background-color: #1E1E1E !important;
+  color: #E2E8F0 !important;
+}
+[data-theme="dark"] #sharePreviewModal h3 {
+  color: #F7FAFC !important;
+}
+[data-theme="dark"] #sharePreviewModal p {
+  color: #A0AEC0 !important;
+}
+[data-theme="dark"] #btnClosePreview {
+  background: #2D3748 !important;
+  color: #E2E8F0 !important;
+}

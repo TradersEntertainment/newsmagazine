@@ -120,13 +120,39 @@ router.post('/ai/process', async (req, res) => {
   }
 });
 
+const sharp = require('sharp');
+
+// WebP image optimizer helper
+async function convertToWebP(inputPath) {
+  const ext = path.extname(inputPath);
+  const dir = path.dirname(inputPath);
+  const base = path.basename(inputPath, ext);
+  const webpFilename = base + '.webp';
+  const outputPath = path.join(dir, webpFilename);
+
+  try {
+    await sharp(inputPath)
+      .resize(1200, null, { withoutEnlargement: true })
+      .webp({ quality: 80 })
+      .toFile(outputPath);
+      
+    // Delete original file
+    fs.unlink(inputPath, () => {});
+    return '/uploads/' + webpFilename;
+  } catch (error) {
+    console.error('Sharp WebP conversion error:', error);
+    // Fallback: return original url if conversion fails
+    return '/uploads/' + path.basename(inputPath);
+  }
+}
+
 // Image upload endpoint
-router.post('/upload', upload.single('image'), (req, res) => {
+router.post('/upload', upload.single('image'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ success: false, message: 'Dosya yüklenemedi.' });
   }
 
-  const url = '/uploads/' + req.file.filename;
+  const url = await convertToWebP(req.file.path);
   return res.json({ success: true, url });
 });
 
@@ -186,8 +212,7 @@ router.post('/upload-url', async (req, res) => {
     };
 
     await download(url);
-    
-    const localUrl = '/uploads/' + localFilename;
+    const localUrl = await convertToWebP(localPath);
     return res.json({ success: true, url: localUrl });
 
   } catch (error) {

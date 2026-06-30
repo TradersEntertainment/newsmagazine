@@ -60,6 +60,31 @@ function getAllArticles(status = null, limit = 50, offset = 0) {
   ).all(limit, offset);
 }
 
+function getAllArticlesFiltered({ status = null, category = null, search = null, limit = 50, offset = 0 } = {}) {
+  let sql = 'SELECT * FROM articles WHERE 1=1';
+  const params = [];
+
+  if (status) {
+    sql += ' AND status = ?';
+    params.push(status);
+  }
+
+  if (category && category !== 'Tümü' && category !== 'all') {
+    sql += ' AND category = ?';
+    params.push(category);
+  }
+
+  if (search) {
+    sql += ' AND (title LIKE ? OR excerpt LIKE ? OR content LIKE ?)';
+    params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+  }
+
+  sql += ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+  params.push(limit, offset);
+
+  return db.prepare(sql).all(...params);
+}
+
 function getArticleBySlug(slug) {
   return db.prepare('SELECT * FROM articles WHERE slug = ?').get(slug);
 }
@@ -143,6 +168,7 @@ function getStats() {
 module.exports = {
   db,
   getAllArticles,
+  getAllArticlesFiltered,
   getArticleBySlug,
   getArticleById,
   createArticle,

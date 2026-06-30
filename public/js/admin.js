@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initImageUpload();
   initDeleteConfirmation();
   initAutoSave();
+  initRichTextEditor();
 });
 
 /* ---------- Sidebar Toggle (Mobile) ---------- */
@@ -155,6 +156,11 @@ function populateEditorFields(data) {
       }
     }
   });
+
+  // Update CKEditor content
+  if (window.CKEDITOR && CKEDITOR.instances.content) {
+    CKEDITOR.instances.content.setData(fields.content);
+  }
 
   // Set cover image if returned from backend API (resolved statically)
   if (data.cover_image) {
@@ -598,6 +604,11 @@ function initAutoSave() {
       if (formSubmitted) return;
       e.preventDefault(); // Always prevent default first to run async tasks
 
+      // Sync CKEditor HTML back to textarea
+      if (window.CKEDITOR && CKEDITOR.instances.content) {
+        CKEDITOR.instances.content.updateElement();
+      }
+
       // Show status on button
       const submitBtn = form.querySelector('button[type="submit"]');
       if (submitBtn) {
@@ -830,4 +841,17 @@ function showNotification(message, type = 'info') {
       setTimeout(() => toast.remove(), 300);
     }
   }, 5000);
+}
+
+/* ---------- CKEditor Rich Text Editor ---------- */
+function initRichTextEditor() {
+  const contentEl = document.getElementById('content');
+  if (contentEl && typeof CKEDITOR !== 'undefined') {
+    // Disable content filtering to prevent stripping custom image placeholders
+    CKEDITOR.config.allowedContent = true;
+    CKEDITOR.replace('content', {
+      height: 400,
+      removePlugins: 'about,forms,iframe'
+    });
+  }
 }

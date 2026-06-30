@@ -150,10 +150,27 @@
     });
   }
 
+  /* --- Dark Mode Theme Switcher --- */
+  function initTheme() {
+    var savedTheme = localStorage.getItem('theme') || 'light';
+    var toggleBtn = document.getElementById('themeToggle');
+    if (toggleBtn) {
+      toggleBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+      toggleBtn.addEventListener('click', function () {
+        var currentTheme = document.documentElement.getAttribute('data-theme');
+        var newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        toggleBtn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+      });
+    }
+  }
+
   /* --- Init on DOM Ready --- */
   document.addEventListener('DOMContentLoaded', function () {
     initFadeIn();
     initBackToTop();
     initShareButtons();
+    initTheme();
   });
 })();

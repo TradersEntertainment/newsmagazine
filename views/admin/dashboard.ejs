@@ -83,6 +83,42 @@
         </div>
       </div>
 
+      <!-- Chart and Quick Actions Grid -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; margin-bottom: 1.5rem;">
+        <div class="card" style="margin-bottom: 0;">
+          <div class="card-header">
+            <h2>En Çok Okunan Haberler</h2>
+          </div>
+          <div class="card-body" style="padding: 1.25rem;">
+            <canvas id="viewsChart" style="max-height: 200px; width: 100%;"></canvas>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 0;">
+          <div class="card-header">
+            <h2>Hızlı İşlemler</h2>
+          </div>
+          <div class="card-body" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 1.25rem;">
+            <a href="/admin/haberler/yeni" class="btn btn-primary" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 15px 10px; font-weight: 600; text-align: center; border-radius: 8px; font-size: 13px; text-decoration: none;">
+              <span style="font-size: 20px;">✍️</span>
+              Yeni Haber Yaz
+            </a>
+            <a href="/admin/aboneler" class="btn btn-secondary" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 15px 10px; font-weight: 600; text-align: center; border-radius: 8px; font-size: 13px; text-decoration: none; background-color: #2D3748; color: #fff; border-color: #2D3748;">
+              <span style="font-size: 20px;">👥</span>
+              Aboneleri Yönet
+            </a>
+            <a href="/" target="_blank" class="btn btn-secondary" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 15px 10px; font-weight: 600; text-align: center; border-radius: 8px; font-size: 13px; text-decoration: none; background-color: #4A5568; color: #fff; border-color: #4A5568;">
+              <span style="font-size: 20px;">🌐</span>
+              Sitenizi Aç
+            </a>
+            <a href="/admin/logout" class="btn btn-secondary" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 15px 10px; font-weight: 600; text-align: center; border-radius: 8px; font-size: 13px; text-decoration: none; background-color: #718096; color: #fff; border-color: #718096;">
+              <span style="font-size: 20px;">🚪</span>
+              Güvenli Çıkış
+            </a>
+          </div>
+        </div>
+      </div>
+
       <!-- Recent Articles -->
       <div class="card">
         <div class="card-header">
@@ -97,29 +133,27 @@
                   <th>Başlık</th>
                   <th>Kategori</th>
                   <th>Durum</th>
+                  <th>Okunma</th>
                   <th>Tarih</th>
                 </tr>
               </thead>
               <tbody>
-                <% articles.slice(0, 5).forEach(function(article) { %>
+                <% articles.forEach(function(art) { %>
                   <tr>
                     <td>
-                      <div class="table-title">
-                        <a href="/admin/haberler/<%= article._id || article.id %>/duzenle">
-                          <%= article.title %>
-                        </a>
-                      </div>
+                      <a href="/admin/haberler/duzenle/<%= art.id %>" class="article-edit-link">
+                        <%= art.title %>
+                      </a>
                     </td>
-                    <td><%= article.category || '—' %></td>
+                    <td><span class="category-badge"><%= art.category %></span></td>
                     <td>
-                      <% if (article.status === 'published') { %>
-                        <span class="badge badge-published">Yayında</span>
-                      <% } else { %>
-                        <span class="badge badge-draft">Taslak</span>
-                      <% } %>
+                      <span class="status-badge <%= art.status === 'published' ? 'published' : 'draft' %>">
+                        <%= art.status === 'published' ? 'Yayında' : 'Taslak' %>
+                      </span>
                     </td>
-                    <td class="text-muted text-sm">
-                      <%= article.createdAt ? new Date(article.createdAt).toLocaleDateString('tr-TR') : '—' %>
+                    <td><strong><%= art.views %></strong></td>
+                    <td class="date-col">
+                      <%= new Date(art.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }) %>
                     </td>
                   </tr>
                 <% }); %>
@@ -135,19 +169,51 @@
         </div>
       </div>
 
-      <!-- Quick Actions -->
-      <div class="quick-actions">
-        <a href="/admin/haberler/yeni" class="btn btn-primary">
-          ✏️ Yeni Haber Yaz
-        </a>
-        <a href="/admin/aboneler" class="btn btn-secondary">
-          👥 Aboneleri Görüntüle
-        </a>
-      </div>
-
     </div>
   </main>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const ctx = document.getElementById('viewsChart').getContext('2d');
+      
+      const articlesData = <%- JSON.stringify(articles || []) %>;
+      // Filter out articles with views > 0 or just show what's there
+      const topArticles = articlesData
+        .sort((a, b) => b.views - a.views)
+        .slice(0, 5);
+
+      const labels = topArticles.map(a => a.title.length > 25 ? a.title.substring(0, 22) + '...' : a.title);
+      const data = topArticles.map(a => a.views);
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels.length > 0 ? labels : ['Haber Yok'],
+          datasets: [{
+            label: 'Okunma',
+            data: data.length > 0 ? data : [0],
+            backgroundColor: '#C53030',
+            borderColor: '#C53030',
+            borderWidth: 1,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: { beginAtZero: true, grid: { display: false } },
+            y: { grid: { display: false } }
+          }
+        }
+      });
+    });
+  </script>
   <script src="/js/admin.js"></script>
 </body>
 </html>

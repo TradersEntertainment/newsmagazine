@@ -17,9 +17,46 @@
   }
 
   var articlesList = typeof articles !== 'undefined' ? articles : [];
-  var heroArticle = articlesList.length > 0 ? articlesList[0] : null;
-  var remainingArticles = articlesList.length > 1 ? articlesList.slice(1) : [];
+  var isFiltered = (typeof currentCategory !== 'undefined' && currentCategory) || (typeof currentSearch !== 'undefined' && currentSearch);
+  var heroArticle = (!isFiltered && articlesList.length > 0) ? articlesList[0] : null;
+  var remainingArticles = isFiltered ? articlesList : (articlesList.length > 1 ? articlesList.slice(1) : []);
 %>
+
+<!-- Search & Filter Controls -->
+<section class="controls-section" style="max-width: 680px; margin: 2rem auto; padding: 0 24px; font-family: 'Inter', sans-serif;">
+  <form action="/" method="GET" style="display: flex; gap: 8px; margin-bottom: 1.5rem;">
+    <input type="text" name="search" placeholder="Analizlerde arama yapın..." value="<%= typeof currentSearch !== 'undefined' && currentSearch ? currentSearch : '' %>" style="flex: 1; padding: 12px 16px; border: 1px solid #E8E4DE; border-radius: 6px; font-size: 14px; outline: none; background: #FFFFFF; font-family: inherit;">
+    <% if (typeof currentCategory !== 'undefined' && currentCategory) { %>
+      <input type="hidden" name="category" value="<%= currentCategory %>">
+    <% } %>
+    <button type="submit" style="padding: 12px 24px; background: #C53030; color: #FFFFFF; border: none; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s; border-color: #C53030;">Ara</button>
+  </form>
+
+  <div class="category-tabs" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; border-bottom: 1px solid #E8E4DE; padding-bottom: 1rem;">
+    <% 
+      var categories = ['Tümü', 'Makroekonomi', 'Türkiye Ekonomisi', 'Küresel Politika', 'Merkez Bankaları', 'Piyasalar', 'Analiz'];
+      var activeCat = (typeof currentCategory !== 'undefined' && currentCategory) ? currentCategory : 'Tümü';
+      categories.forEach(function(cat) {
+        var isSelected = (activeCat === cat);
+        var url = cat === 'Tümü' ? '/' : ('/?category=' + encodeURIComponent(cat));
+        if (typeof currentSearch !== 'undefined' && currentSearch) {
+          url += (cat === 'Tümü' ? '?' : '&') + 'search=' + encodeURIComponent(currentSearch);
+        }
+    %>
+      <a href="<%= url %>" style="padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid <%= isSelected ? '#C53030' : '#E8E4DE' %>; background-color: <%= isSelected ? '#C53030' : 'transparent' %>; color: <%= isSelected ? '#FFFFFF' : '#718096' %>; transition: all 0.2s;"><%= cat %></a>
+    <% }); %>
+  </div>
+</section>
+
+<% if (isFiltered) { %>
+  <!-- Filter Header -->
+  <section class="container" style="margin-top: 1rem; margin-bottom: 0;">
+    <div style="font-family: 'Inter', sans-serif; font-size: 14px; color: #718096; margin-bottom: 2rem;">
+      🔍 <%= articlesList.length %> haber listelendi. 
+      <a href="/" style="color: #C53030; font-weight: 600; margin-left: 8px; text-decoration: underline;">Filtreyi Temizle</a>
+    </div>
+  </section>
+<% } %>
 
 <% if (heroArticle) { %>
 <!-- Hero Section -->
@@ -43,20 +80,19 @@
     <% } %>
     <div class="hero-meta">
       <span class="hero-date"><%= formatDate(heroArticle.published_at || heroArticle.created_at) %></span>
+      <a href="/haber/<%= heroArticle.slug %>" class="hero-read-more">DEVAMINI OKU →</a>
     </div>
-    <a href="/haber/<%= heroArticle.slug %>" class="hero-read-more">DEVAMINI OKU →</a>
   </div>
 </section>
 <% } %>
 
 <% if (remainingArticles.length > 0) { %>
-<!-- Section Divider -->
-<div class="section-divider">
-  <h2>SON YAZILAR</h2>
-</div>
-
-<!-- Articles Grid -->
-<section class="articles-section">
+<!-- Son Yazılar Section -->
+<section class="recent-articles-section">
+  <div class="section-divider">
+    <h2><%= isFiltered ? 'SONUÇLAR' : 'SON YAZILAR' %></h2>
+  </div>
+  
   <div class="articles-grid">
     <% remainingArticles.forEach(function(article) { %>
     <article class="article-card">
@@ -67,7 +103,7 @@
           <div class="card-image-placeholder"></div>
         <% } %>
       </a>
-      <div class="card-body">
+      <div class="article-card-content">
         <% if (article.category) { %>
           <span class="card-category"><%= article.category %></span>
         <% } %>
@@ -88,11 +124,34 @@
 </section>
 <% } %>
 
+<!-- Pagination -->
+<% if (typeof currentPage !== 'undefined' && (currentPage > 1 || hasNextPage)) { %>
+<div class="pagination" style="display: flex; justify-content: center; gap: 16px; margin: 3rem 0; font-family: 'Inter', sans-serif;">
+  <% if (currentPage > 1) { 
+    var prevUrl = '/?page=' + (currentPage - 1);
+    if (typeof currentCategory !== 'undefined' && currentCategory) prevUrl += '&category=' + encodeURIComponent(currentCategory);
+    if (typeof currentSearch !== 'undefined' && currentSearch) prevUrl += '&search=' + encodeURIComponent(currentSearch);
+  %>
+    <a href="<%= prevUrl %>" class="btn-prev" style="padding: 10px 20px; border: 1px solid #E8E4DE; border-radius: 6px; color: #C53030; font-weight: 600; text-decoration: none; transition: background 0.2s;">← Önceki Sayfa</a>
+  <% } %>
+  
+  <% if (hasNextPage) { 
+    var nextUrl = '/?page=' + (currentPage + 1);
+    if (typeof currentCategory !== 'undefined' && currentCategory) nextUrl += '&category=' + encodeURIComponent(currentCategory);
+    if (typeof currentSearch !== 'undefined' && currentSearch) nextUrl += '&search=' + encodeURIComponent(currentSearch);
+  %>
+    <a href="<%= nextUrl %>" class="btn-next" style="padding: 10px 20px; border: 1px solid #E8E4DE; border-radius: 6px; color: #C53030; font-weight: 600; text-decoration: none; transition: background 0.2s;">Sonraki Sayfa →</a>
+  <% } %>
+</div>
+<% } %>
+
 <% if (!heroArticle && remainingArticles.length === 0) { %>
 <!-- Welcome State -->
-<section class="welcome-section">
-  <h1>EuroPolitika'ya Hoş Geldiniz</h1>
-  <p>Politik ekonomi dünyasından en güncel analizler ve haberler yakında burada olacak. Abone olarak ilk yazılarımızdan haberdar olun.</p>
+<section class="welcome-section" style="max-width: 680px; margin: 4rem auto; text-align: center; padding: 0 24px; font-family: 'Inter', sans-serif;">
+  <div style="font-size: 48px; margin-bottom: 1.5rem;">📰</div>
+  <h1 style="font-family: 'Playfair Display', serif; font-size: 28px; color: #1A1A1A; margin-bottom: 1rem; font-weight: 700;">Haber Bulunamadı</h1>
+  <p style="color: #718096; line-height: 1.6; margin-bottom: 1.5rem;">Aradığınız kriterlere uygun herhangi bir haber veya analiz bulunamadı. Lütfen aramayı değiştirmeyi deneyin.</p>
+  <a href="/" style="display: inline-block; padding: 10px 24px; background: #C53030; color: #FFFFFF; font-weight: 600; text-decoration: none; border-radius: 6px; font-size: 14px;">Tüm Haberleri Göster</a>
 </section>
 <% } %>
 
