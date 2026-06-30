@@ -1094,3 +1094,173 @@ img {
     display: none;
   }
 }
+
+/* Three-Column Editorial Layout for Article Detail */
+@media (min-width: 1200px) {
+  .article-layout-container {
+    display: grid;
+    grid-template-columns: 220px 680px 260px;
+    gap: 40px;
+    max-width: 1240px;
+    margin: 0 auto;
+    align-items: start;
+    padding: 32px 24px;
+  }
+  
+  .article-detail {
+    max-width: 680px;
+    margin: 0;
+    padding: 0;
+    border-left: 1px solid #E8E4DE;
+    border-right: 1px solid #E8E4DE;
+    padding: 0 40px;
+  }
+  
+  /* Hide floating bar since left sidebar has it */
+  .desktop-share-bar {
+    display: none !important;
+  }
+  
+  .article-sidebar-left,
+  .article-sidebar-right {
+    display: block;
+    position: sticky;
+    top: 100px; /* Sticky floating on scroll */
+  }
+  
+  .sidebar-widget {
+    background: #FFFFFF;
+    border: 1px solid #E8E4DE;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  }
+  
+  .sidebar-widget h3 {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #718096;
+    margin: 0 0 16px 0;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #C53030;
+    display: inline-block;
+  }
+  
+  /* Ticker styles */
+  .ticker-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #F0ECE7;
+    font-family: 'Inter', sans-serif;
+  }
+  .ticker-item:last-child {
+    border-bottom: none;
+  }
+  .ticker-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #4A5568;
+  }
+  .ticker-value {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1A1A1A;
+  }
+  .ticker-change {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .ticker-change.positive {
+    color: #38A169;
+    background: #E6FFFA;
+  }
+  .ticker-change.negative {
+    color: #E53E3E;
+    background: #FFF5F5;
+  }
+  .ticker-change.neutral {
+    color: #718096;
+    background: #EDF2F7;
+  }
+  
+  /* Agenda list */
+  .agenda-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .agenda-list li {
+    font-size: 12px;
+    color: #4A5568;
+    margin-bottom: 12px;
+    line-height: 1.5;
+    border-left: 3px solid #E8E4DE;
+    padding-left: 10px;
+  }
+  .agenda-list li:last-child {
+    margin-bottom: 0;
+  }
+  .agenda-list li strong {
+    color: #C53030;
+    display: block;
+    font-size: 10px;
+    margin-bottom: 2px;
+    letter-spacing: 1px;
+  }
+  
+  /* Recommended Cards */
+  .recommended-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .rec-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease;
+  }
+  .rec-card:hover {
+    transform: translateY(-2px);
+  }
+  .rec-card img, 
+  .rec-card .placeholder-img {
+    width: 100%;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border: 1px solid #E8E4DE;
+  }
+  .rec-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: #1A1A1A;
+    margin-bottom: 4px;
+  }
+  .rec-meta {
+    font-size: 11px;
+    color: #888;
+  }
+}
+
+@media (max-width: 1199px) {
+  .article-layout-container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+  .article-sidebar-left,
+  .article-sidebar-right {
+    display: none; /* Hide sidebars on smaller screens */
+  }
+}
