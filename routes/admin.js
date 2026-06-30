@@ -46,7 +46,7 @@ router.use(requireAdmin);
 router.get('/', (req, res) => {
   const stats = getStats();
   const recentArticles = getAllArticles(null, 5, 0);
-  res.render('admin/dashboard', { stats, recentArticles });
+  res.render('admin/dashboard', { stats, articles: recentArticles });
 });
 
 // List all articles
