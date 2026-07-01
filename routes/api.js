@@ -9,6 +9,7 @@ const urlModule = require('url');
 const { processContent, processNewsletterContent } = require('../services/groq');
 const { scrapeUrl } = require('../services/scraper');
 const sharp = require('sharp');
+const cheerio = require('cheerio');
 
 // Multer storage configuration
 const storage = multer.diskStorage({
@@ -100,6 +101,46 @@ async function downloadAndSaveAsWebP(targetUrl) {
   } catch (error) {
     console.error('downloadAndSaveAsWebP error:', error.message);
     return null;
+  }
+}
+
+// Helper to automatically download and save stock photos for all image placeholders in the content
+async function autoResolveAllPlaceholders(htmlContent) {
+  if (!htmlContent) return htmlContent;
+
+  try {
+    const parser = cheerio.load(htmlContent);
+    const placeholders = parser('img.image-placeholder');
+
+    for (let i = 0; i < placeholders.length; i++) {
+      const ph = placeholders[i];
+      const prompt = parser(ph).attr('data-prompt') || 'news';
+      const search = parser(ph).attr('data-search') || prompt;
+
+      // Use clean english search term for loremflickr
+      const cleanSearch = encodeURIComponent(search.replace(/[^a-zA-Z0-9\s]/g, '').trim());
+      const stockUrl = `https://loremflickr.com/800/500/${cleanSearch}`;
+
+      console.log(`[Newsletter Compiler] Haber içi görsel otomatik indiriliyor: Prompt: ${prompt}, Arama: ${search} -> ${stockUrl}`);
+
+      try {
+        const localUrl = await downloadAndSaveAsWebP(stockUrl);
+        if (localUrl) {
+          // Replace this placeholder tag with a real image tag
+          parser(ph).replaceWith(`<img class="article-inline-image" src="${localUrl}" alt="${prompt.replace(/"/g, '&quot;')}">`);
+        } else {
+          parser(ph).remove();
+        }
+      } catch (err) {
+        console.warn(`[Newsletter Compiler] Haber içi görsel indirilemedi. Hata: ${err.message}`);
+        parser(ph).remove();
+      }
+    }
+
+    return parser('body').html() || htmlContent;
+  } catch (e) {
+    console.error('autoResolveAllPlaceholders error:', e);
+    return htmlContent;
   }
 }
 
@@ -463,10 +504,10 @@ router.post('/ai/process-newsletter', async (req, res) => {
     console.log(`[Newsletter Compiler] ${collageImagePaths.length} adet görsel ile kapak kolajı oluşturuluyor...`);
     const collageUrl = await createCollage(collageImagePaths);
     result.cover_image = collageUrl;
-
-    // Prepare placeholders for editor
+ 
+    // Auto-resolve all image placeholders on the backend
     if (result.content) {
-      result.content = preparePlaceholdersForEditor(result.content);
+      result.content = await autoResolveAllPlaceholders(result.content);
     }
 
     // 4. Return result and resolved slot images
