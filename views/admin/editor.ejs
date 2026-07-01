@@ -143,6 +143,20 @@
                       required
                     ><%= (typeof article !== 'undefined' && article && article.content) ? article.content : '' %></textarea>
                   </div>
+
+                  <div class="form-group" style="margin-top: 1.5rem; border-top: 1px solid #E2E8F0; padding-top: 1.5rem;">
+                    <label for="editor_analysis" style="display: flex; align-items: center; gap: 6px;">
+                      <span style="font-weight: 700; color: #1A1A1A;">⭐ Editör Özel Analizi / Yorumu (Opsiyonel)</span>
+                      <span style="font-size: 10px; font-weight: 700; color: #C53030; background: #FFF5F5; border: 1px solid #FED7D7; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px;">Dış Analiz Kutusu</span>
+                    </label>
+                    <textarea
+                      id="editor_analysis"
+                      name="editor_analysis"
+                      rows="6"
+                      placeholder="Dışarıda başka bir yapay zekaya (ChatGPT, Claude vb.) yaptırdığınız kendi analiz veya yorumlarınızı buraya yapıştırabilirsiniz. Bu alan bültenin en altında ayrı şık bir kutu halinde görünecektir."
+                      style="width: 100%; border: 1px solid #CBD5E0; border-radius: 6px; padding: 12px; font-family: inherit; font-size: 14px; line-height: 1.5; resize: vertical; box-sizing: border-box;"
+                    ><%= (typeof article !== 'undefined' && article && article.editor_analysis) ? article.editor_analysis : '' %></textarea>
+                  </div>
                 </div>
               </div>
             </div>

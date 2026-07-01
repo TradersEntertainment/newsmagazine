@@ -78,7 +78,7 @@ router.get('/haberler/:id/duzenle', (req, res) => {
 
 // Create or update article
 router.post('/haberler', (req, res) => {
-  const { id, title, excerpt, content, cover_image, social_image, category, tags, status } = req.body;
+  const { id, title, excerpt, content, cover_image, social_image, editor_analysis, category, tags, status } = req.body;
 
   // Generate slug from title with Turkish character support
   const slug = slugify(title, {
@@ -97,6 +97,7 @@ router.post('/haberler', (req, res) => {
       content,
       cover_image: cover_image || null,
       social_image: social_image || null,
+      editor_analysis: editor_analysis || null,
       category: category || 'Genel',
       tags: tags || null,
       status: status || 'draft'
@@ -110,6 +111,7 @@ router.post('/haberler', (req, res) => {
       content,
       cover_image: cover_image || null,
       social_image: social_image || null,
+      editor_analysis: editor_analysis || null,
       category: category || 'Genel',
       tags: tags || null,
       status: status || 'draft'
