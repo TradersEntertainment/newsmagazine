@@ -1,7 +1,7 @@
 import { MAX_DPR } from '../data/balance';
-import type { Era } from '../sim/tiles';
-import type { World } from '../sim/world';
+import type { GameState } from '../sim/state';
 import type { Camera } from './camera';
+import { drawBuildings, drawZones } from './layers/buildings';
 import {
   drawDraft,
   drawInkDry,
@@ -26,8 +26,7 @@ export interface RenderStats {
 }
 
 export interface Scene {
-  world: World;
-  era: Era;
+  state: GameState;
   draft: DraftRender | null;
   inkDry: readonly InkDryEffect[];
   now: number;
@@ -77,14 +76,21 @@ export class Renderer {
     this.camera.setViewport(width, height);
   }
 
-  /** One frame. Draw order: terrain → roads → effects → draft. */
+  /**
+   * One frame. Draw order matters: terrain, then the zones painted on it, then
+   * roads over both, then the buildings that front onto them, then effects and
+   * the live stroke on top of everything.
+   */
   render(scene: Scene, deltaMs: number): void {
     const started = performance.now();
     const ctx = this.ctx;
+    const { state } = scene;
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
 
-    this.terrain.draw(ctx, scene.world, this.camera, scene.era);
-    drawRoads(ctx, scene.world, this.camera, styleForEra(scene.era));
+    this.terrain.draw(ctx, state.world, this.camera, state.era);
+    drawZones(ctx, state, this.camera);
+    drawRoads(ctx, state.world, this.camera, styleForEra(state.era));
+    drawBuildings(ctx, state, this.camera, scene.now);
     drawInkDry(ctx, this.camera, scene.inkDry, scene.now);
     if (scene.draft) drawDraft(ctx, this.camera, scene.draft);
 

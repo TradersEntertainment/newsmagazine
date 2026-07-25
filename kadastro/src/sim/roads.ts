@@ -1,6 +1,7 @@
 import { BRIDGE_COST_MULTIPLIER, SLOPE_COST_FACTOR } from '../data/balance';
 import { ROAD_SPECS, tierOf } from '../data/roads';
 import type { TilePoint } from '../input/pathGeometry';
+import type { TileEdit } from './undo';
 import { decodeRoad, encodeRoad, NONE, type RoadKind } from './tiles';
 import { index, inBounds, isTileOwned, type World } from './world';
 import { isWater, slopeAt } from './worldgen';
@@ -104,15 +105,8 @@ export function estimateRoad(
   return { tiles, total, affordable, affordableCost, truncatedAt };
 }
 
-export interface RoadChange {
-  x: number;
-  y: number;
-  /** Encoded road value before the change, for undo. */
-  previous: number;
-}
-
 export interface BuildResult {
-  changes: RoadChange[];
+  changes: TileEdit[];
   spent: number;
   /** True when the balance cut the line short. */
   truncated: boolean;
@@ -130,14 +124,14 @@ export function buildRoad(
   budget: number,
 ): BuildResult {
   const estimate = estimateRoad(world, path, kind, budget);
-  const changes: RoadChange[] = [];
+  const changes: TileEdit[] = [];
   let spent = 0;
 
   for (let i = 0; i < estimate.affordable; i++) {
     const tile = estimate.tiles[i] as TileCost;
     if (tile.blocked || tile.redundant) continue;
     const at = index(world, tile.x, tile.y);
-    changes.push({ x: tile.x, y: tile.y, previous: world.road[at] ?? NONE });
+    changes.push({ x: tile.x, y: tile.y, layer: 'road', previous: world.road[at] ?? NONE });
     world.road[at] = encodeRoad(kind);
     spent += tile.cost;
   }
@@ -147,25 +141,18 @@ export function buildRoad(
 
 /** Demolition (§5.1). Free, and undoable like everything else. */
 export function removeRoad(world: World, path: readonly TilePoint[]): BuildResult {
-  const changes: RoadChange[] = [];
+  const changes: TileEdit[] = [];
 
   for (const point of path) {
     if (!inBounds(world, point.x, point.y)) continue;
     const at = index(world, point.x, point.y);
     const previous = world.road[at] ?? NONE;
     if (previous === NONE) continue;
-    changes.push({ x: point.x, y: point.y, previous });
+    changes.push({ x: point.x, y: point.y, layer: 'road', previous });
     world.road[at] = NONE;
   }
 
   return { changes, spent: 0, truncated: false };
-}
-
-/** Reverses a build or a demolition. */
-export function revertRoadChanges(world: World, changes: readonly RoadChange[]): void {
-  for (const change of changes) {
-    world.road[index(world, change.x, change.y)] = change.previous;
-  }
 }
 
 export function roadAt(world: World, x: number, y: number): RoadKind | null {

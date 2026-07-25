@@ -153,7 +153,7 @@ describe('undo', () => {
     const before = game.money;
     const result = buildRoad(game.world, strip(8), 'path', game.money);
     game.money -= result.spent;
-    undo.push({ kind: 'road', changes: result.changes, spent: result.spent });
+    undo.push({ changes: result.changes, spent: result.spent });
 
     expect(game.money).toBeLessThan(before);
     undo.undo(game);
@@ -165,7 +165,7 @@ describe('undo', () => {
     const undo = new UndoStack();
     buildRoad(game.world, strip(4), 'path', 10_000);
     const upgrade = buildRoad(game.world, strip(4), 'asphalt', 10_000);
-    undo.push({ kind: 'road', changes: upgrade.changes, spent: upgrade.spent });
+    undo.push({ changes: upgrade.changes, spent: upgrade.spent });
 
     undo.undo(game);
     expect(roadAt(game.world, origin.x, origin.y)).toBe('path');
@@ -175,7 +175,7 @@ describe('undo', () => {
     const undo = new UndoStack();
     buildRoad(game.world, strip(4), 'path', 10_000);
     const removal = removeRoad(game.world, strip(4));
-    undo.push({ kind: 'road', changes: removal.changes, spent: 0 });
+    undo.push({ changes: removal.changes, spent: 0 });
 
     undo.undo(game);
     expect(roadAt(game.world, origin.x, origin.y)).toBe('path');
@@ -184,14 +184,14 @@ describe('undo', () => {
   it('remembers at most twenty actions', () => {
     const undo = new UndoStack();
     for (let i = 0; i < 30; i++) {
-      undo.push({ kind: 'road', changes: [{ x: i, y: 0, previous: 0 }], spent: 1 });
+      undo.push({ changes: [{ x: i, y: 0, layer: 'road' as const, previous: 0 }], spent: 1 });
     }
     expect(undo.depth).toBe(20);
   });
 
   it('ignores actions that changed nothing', () => {
     const undo = new UndoStack();
-    undo.push({ kind: 'road', changes: [], spent: 0 });
+    undo.push({ changes: [], spent: 0 });
     expect(undo.canUndo).toBe(false);
   });
 });

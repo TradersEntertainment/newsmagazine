@@ -87,6 +87,69 @@ body {
 
 #top-bar {
   justify-content: space-between;
+  gap: 10px;
+}
+
+.hud-block {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hud-right {
+  align-items: flex-end;
+  text-align: right;
+  overflow: hidden;
+}
+
+.hud-right .mono {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+#hud-net[data-sign='negative'] {
+  color: var(--kiremit);
+}
+
+/* RCI demand, the one place three numbers read faster as bars (§8). */
+.demand {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 26px;
+  flex: none;
+}
+
+.demand-bar {
+  display: flex;
+  align-items: flex-end;
+  width: 5px;
+  height: 100%;
+  background: color-mix(in srgb, var(--parsomen) 12%, transparent);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.demand-bar i {
+  display: block;
+  width: 100%;
+  height: 0;
+  transition: height 400ms ease-out;
+}
+
+#demand-res {
+  background: var(--pirinc);
+}
+
+#demand-com {
+  background: var(--cini);
+}
+
+#demand-ind {
+  background: var(--kiremit);
 }
 
 .money {
@@ -128,9 +191,14 @@ body {
 
 .tool-button {
   pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
   min-height: var(--touch-min);
   min-width: var(--touch-min);
-  padding: 0 16px;
+  padding: 0 12px;
   border: 1px solid color-mix(in srgb, var(--parsomen) 22%, transparent);
   border-radius: 10px;
   background: transparent;
@@ -140,6 +208,17 @@ body {
   letter-spacing: 0.04em;
   text-transform: lowercase;
   cursor: pointer;
+}
+
+.tool-name {
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.tool-option {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  opacity: 0.75;
 }
 
 .tool-button[data-active='true'] {
@@ -191,6 +270,43 @@ body {
 .sheet-row[data-locked='true'] {
   color: var(--sis);
   cursor: default;
+}
+
+.sheet-row[data-selected='true'] .sheet-row-name {
+  color: var(--pirinc);
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex: none;
+  margin-right: 10px;
+}
+
+.brush-row {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px 14px;
+}
+
+.brush-button {
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+  padding: 0 14px;
+  border: 1px solid color-mix(in srgb, var(--parsomen) 22%, transparent);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--parsomen);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.brush-button[data-selected='true'] {
+  background: var(--pirinc);
+  border-color: var(--pirinc);
+  color: var(--murekkep);
 }
 
 .sheet-row-meta {

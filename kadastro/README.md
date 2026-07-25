@@ -32,7 +32,7 @@ npm test         # vitest
 | --- | --- | --- |
 | 0 | İskelet, PWA, Safari düzeltmeleri, kamera, sabit zamanlı döngü, boş ızgara | Tamam |
 | 1 | Arazi üretimi ve yol çizimi | Tamam |
-| 2 | Bölgeler, binalar, temel ekonomi | — |
+| 2 | Bölgeler, binalar, temel ekonomi | Tamam |
 | 3 | Trafik, şebekeler, hizmetler, difüzyon | — |
 | 4 | Çağlar, teknoloji, görevler, olaylar, offline, kayıt | — |
 | 5 | Cila, mahalle isimleri, performans, öğretici | — |

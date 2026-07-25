@@ -97,6 +97,25 @@ export const commercialJobs = (level: number): number => 3 * Math.pow(level, 1.5
 /** SANAYİ_İŞ(l) = 5 * l^1.4 */
 export const industrialJobs = (level: number): number => 5 * Math.pow(level, 1.4);
 
+/** Zone painting costs per tile (§6.1). */
+export const ZONE_COST = {
+  res: 40,
+  com: 65,
+  ind: 55,
+  farm: 20,
+  park: 90,
+} as const;
+/** Brush diameters offered in the dock (§6.1). */
+export const BRUSH_SIZES = [1, 3, 5] as const;
+
+/**
+ * Seconds at full suitability to gain the next level. Construction is short by
+ * design (§1) — the "almost there" feeling has to stay constant.
+ */
+export const BUILDING_GROWTH_S = [14, 35, 80, 170] as const;
+/** Fraction of capacity a building starts with when it appears. */
+export const BUILDING_SEED_OCCUPANCY = 0.35;
+
 /** Suitability weights — §6.2 */
 export const SUITABILITY_WEIGHTS = {
   roadAccess: 0.3,
@@ -114,12 +133,57 @@ export const WATER_PER_CAPITA = 0.35; // m³/min — KİŞİ_BAŞI_SU
 export const POWER_PER_CAPITA = 0.012; // MW — KİŞİ_BAŞI_ELEKTRİK
 
 // --- Population (§8, §20) ----------------------------------------------------
-/** GÖÇ_KATSAYISI = 0.02 * (mutluluk-40)/60 * boşKonut */
-export const MIGRATION_COEFFICIENT = 0.02;
+/**
+ * GÖÇ_KATSAYISI = k * (mutluluk-40)/60 * boşKonut, per minute.
+ *
+ * The shape is the brief's; the coefficient is not. Because migration is
+ * proportional to vacancy, k sets how long an empty home takes to fill:
+ * 1 / (k × (happiness−40)/60) minutes. The brief's 0.02 works out to roughly
+ * an hour at a contented happiness of 85, which reads as a city that has
+ * stopped rather than one that is filling, and it stalls the whole feedback
+ * loop — vacancy stays high, residential demand stays at zero, and nothing
+ * more is ever built. 0.5 gives a fill time near three minutes, which is slow
+ * enough to watch and fast enough to keep the loop turning.
+ */
+export const MIGRATION_COEFFICIENT = 0.5;
 export const MIGRATION_HAPPINESS_PIVOT = 40;
 export const MIGRATION_HAPPINESS_SPAN = 60;
 export const HAPPINESS_EXODUS_THRESHOLD = 35;
 export const HAPPINESS_START = 60;
+/** Share of residents who are of working age (§8). */
+export const LABOUR_PARTICIPATION = 0.5;
+/** Residents one commercial job serves; sets how much retail a city wants. */
+export const RESIDENTS_PER_COMMERCIAL_JOB = 14;
+/** Commercial jobs one industrial job supplies. */
+export const COMMERCIAL_PER_INDUSTRIAL_JOB = 1.6;
+/** How fast demand chases its target, per second. */
+export const DEMAND_RESPONSE = 0.25;
+/** How fast happiness chases its target, per second. */
+export const HAPPINESS_RESPONSE = 0.08;
+/** Unemployment above this starts hurting happiness. */
+export const UNEMPLOYMENT_TOLERANCE = 0.08;
+/**
+ * Happiness lost at total unemployment. Kept moderate on purpose: a founding
+ * village with no formal jobs should stagnate, not empty out. A steeper curve
+ * makes the game punish the player for following its own opening move.
+ */
+export const UNEMPLOYMENT_PENALTY = 75;
+
+// --- Trade and yields (§7) ---------------------------------------------------
+/** Turnover per commercial job per minute. */
+export const COMMERCIAL_TURNOVER = 26;
+/** Output per industrial job per minute. */
+export const INDUSTRIAL_OUTPUT = 18;
+/** Food per farm tile per minute. */
+export const FARM_YIELD = 4;
+/**
+ * Work per farm tile. Farmland is the founding era's employer (§12.1 opens
+ * with path, housing and farm), so without it the first village has nowhere
+ * to work and no reason to stay.
+ */
+export const FARM_JOBS_PER_TILE = 0.35;
+export const COMMERCIAL_TAX = 0.06;
+export const INDUSTRIAL_TAX = 0.05;
 
 // --- Roads (§5.2, §20) -------------------------------------------------------
 export const JUNCTION_PENALTY_4WAY = 0.25; // KAVŞAK_CEZASI

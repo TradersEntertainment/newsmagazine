@@ -1,6 +1,7 @@
 import { INK_DRY_MS } from '../../data/balance';
 import type { TilePoint } from '../../input/pathGeometry';
-import { decodeRoad, NONE, type RoadKind } from '../../sim/tiles';
+import { ZONE_TINTS } from '../../data/buildings';
+import { decodeRoad, NONE, type RoadKind, type ZoneKind } from '../../sim/tiles';
 import { index, inBounds, type World } from '../../sim/world';
 import type { Camera } from '../camera';
 import { PALETTE, type DrawStyle } from '../style';
@@ -183,6 +184,9 @@ export interface DraftRender {
   affordableTiles: number;
   tiles: readonly TilePoint[];
   kind: RoadKind;
+  mode: 'road' | 'zone';
+  /** Zone being painted, when mode is 'zone'. */
+  zone: ZoneKind | null;
 }
 
 /**
@@ -195,6 +199,10 @@ export function drawDraft(
   camera: Camera,
   draft: DraftRender,
 ): void {
+  if (draft.mode === 'zone') {
+    drawZoneDraft(ctx, camera, draft);
+    return;
+  }
   if (draft.polyline.length === 0) return;
   const scale = camera.scale;
   const look = LOOKS[draft.kind];
@@ -234,6 +242,32 @@ export function drawDraft(
     ctx.restore();
   }
 }
+
+/**
+ * The zone brush under the finger. Painted tiles are shown filled rather than
+ * outlined so the player can see the shape of the district taking form, and
+ * the unaffordable tail is hatched in brick the same way a road's is dotted.
+ */
+function drawZoneDraft(
+  ctx: CanvasRenderingContext2D,
+  camera: Camera,
+  draft: DraftRender,
+): void {
+  if (!draft.zone || draft.tiles.length === 0) return;
+  const scale = camera.scale;
+
+  ctx.save();
+  for (let i = 0; i < draft.tiles.length; i++) {
+    const tile = draft.tiles[i] as TilePoint;
+    const screen = camera.worldToScreen(tile.x, tile.y);
+    const affordable = i < draft.affordableTiles;
+    ctx.globalAlpha = affordable ? 0.55 : 0.4;
+    ctx.fillStyle = affordable ? ZONE_TINTS[draft.zone] : PALETTE.brick;
+    ctx.fillRect(screen.x, screen.y, scale + 1, scale + 1);
+  }
+  ctx.restore();
+}
+
 
 // --- Ink drying (build confirmation) -----------------------------------------
 

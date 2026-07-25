@@ -18,6 +18,8 @@ export interface UiState {
   activeTool: ToolId;
   overlay: OverlayId;
   /** Diagnostics strip; Phase 0 uses it to prove the frame budget. */
+  demand: { res: number; com: number; ind: number };
+  net: number;
   fps: number;
   cameraReadout: string;
   hintVisible: boolean;
@@ -29,6 +31,9 @@ export interface SimSnapshot {
   population: number;
   happiness: number;
   taxRate: number;
+  demand: { res: number; com: number; ind: number };
+  /** Net income per minute; drives the sign and colour of the HUD figure. */
+  net: number;
 }
 
 export interface UiActions {
@@ -50,17 +55,25 @@ export const uiStore = createStore<UiState & UiActions>()((set) => ({
   taxRate: STARTING_TAX_RATE,
   activeTool: 'none',
   overlay: 'none',
+  demand: { res: 0, com: 0, ind: 0 },
+  net: 0,
   fps: 0,
   cameraReadout: '',
   hintVisible: true,
 
   syncFromSim: (snapshot) =>
     set((current) =>
+      // Identity when nothing moved, so subscribers do not repaint on a tick
+      // that changed nothing.
       current.money === snapshot.money &&
       current.era === snapshot.era &&
       current.population === snapshot.population &&
       current.happiness === snapshot.happiness &&
-      current.taxRate === snapshot.taxRate
+      current.taxRate === snapshot.taxRate &&
+      current.net === snapshot.net &&
+      current.demand.res === snapshot.demand.res &&
+      current.demand.com === snapshot.demand.com &&
+      current.demand.ind === snapshot.demand.ind
         ? current
         : { ...current, ...snapshot },
     ),

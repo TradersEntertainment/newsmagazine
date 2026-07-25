@@ -2,8 +2,8 @@ import './style.css';
 import { bindAudioUnlock } from './audio/context';
 import { INK_DRY_MS } from './data/balance';
 import { STR } from './data/strings.tr';
-import { bindPointerInput, bindWheelZoom } from './input/pointer';
 import type { TilePoint } from './input/pathGeometry';
+import { bindPointerInput, bindWheelZoom } from './input/pointer';
 import { ToolController } from './input/tools';
 import { registerServiceWorker } from './pwa/registerSW';
 import { Camera } from './render/camera';
@@ -13,6 +13,7 @@ import { Clock } from './sim/clock';
 import { creditAwayTime } from './sim/offline';
 import { hashSeed } from './sim/rng';
 import { createGameState } from './sim/state';
+import { Systems } from './sim/systems';
 import { UndoStack } from './sim/undo';
 import { startingCentre } from './sim/world';
 import { uiStore } from './state/store';
@@ -35,6 +36,7 @@ const camera = new Camera();
 const renderer = new Renderer(canvas, camera);
 const clock = new Clock();
 const undo = new UndoStack();
+const systems = new Systems(game.world.size);
 
 const home = startingCentre(game.world);
 camera.centreOn(home.x, home.y);
@@ -48,6 +50,8 @@ const tools = new ToolController(game, camera, undo, {
     haptics.confirm();
     uiStore.getState().hideHint();
   },
+  // Road access, and therefore land value, is derived from the road column.
+  onRoadsChanged: () => systems.invalidateFields(),
   onChanged: () => syncUi(),
 });
 
@@ -76,10 +80,10 @@ const input = bindPointerInput(canvas, {
     dock.closeSheet();
     tools.strokeStart(sample.x, sample.y);
   },
-  onTap: () => dock.closeSheet(),
   onStrokeMove: (sample) => tools.strokeMove(sample.x, sample.y),
   onStrokeEnd: () => tools.strokeEnd(),
   onStrokeCancel: () => tools.cancelStroke(),
+  onTap: () => dock.closeSheet(),
 });
 bindWheelZoom(canvas, (x, y, factor) => camera.zoomAt(x, y, factor));
 bindAudioUnlock(canvas);
@@ -125,16 +129,27 @@ function frame(now: number): void {
 
   input.tick(now);
   const budget = clock.advance(deltaMs);
-  game.tick += budget.simTicks;
+
+  if (budget.simTicks > 0) {
+    game.tick += budget.simTicks;
+    const seconds = (budget.simTicks * clock.simStepMs) / 1000;
+    const era = systems.step(game, seconds);
+    if (era) {
+      // A new era unlocks tools and changes how the map is drawn; both are read
+      // from state, so the dock just needs to re-render its rows.
+      dock.refresh();
+      renderer.invalidateTerrain();
+    }
+  }
+  if (budget.economyTicks > 0) {
+    systems.stepEconomy(game, (budget.economyTicks * clock.economyStepMs) / 1000);
+  }
   game.playedMs = clock.playedMs;
 
   tools.update();
   pruneInkDry(now);
 
-  renderer.render(
-    { world: game.world, era: game.era, draft: tools.draft, inkDry, now },
-    deltaMs,
-  );
+  renderer.render({ state: game, draft: tools.draft, inkDry, now }, deltaMs);
 
   updateCostLabel(tools.isDrawing ? tools.summary : null);
   publishReadout();
@@ -157,14 +172,18 @@ function syncUi(): void {
     population: game.population,
     happiness: game.happiness,
     taxRate: game.taxRate,
+    demand: { ...game.demand },
+    net: game.ledger.net,
   });
 }
 
 function publishReadout(): void {
-  // Store writes drive DOM updates; twice a second is plenty for diagnostics.
+  // Store writes drive DOM updates; twice a second is plenty for a city whose
+  // numbers move on a one-second tick.
   readoutAccumulator += 1;
   if (readoutAccumulator < 15) return;
   readoutAccumulator = 0;
+  syncUi();
   const state = uiStore.getState();
   state.setCameraReadout(STR.camera.readout(camera.x, camera.y, camera.zoom));
   state.setFps(renderer.stats.fps);

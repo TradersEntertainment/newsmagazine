@@ -17,13 +17,41 @@ export const STR = {
   empty: {
     noRoads: 'Henüz yol yok. Bir hat çiz, gerisi kendiliğinden gelir.',
     noZones: 'Bölge boyanmamış. Yolun kenarını konuta ayır.',
+    noPeople: 'Konut boyandı. İlk hane birazdan taşınır.',
   },
 
   tools: {
     road: 'yol',
+    zone: 'bölge',
     erase: 'sil',
     undo: 'geri al',
     roadSheetTitle: 'Yol tipi',
+    zoneSheetTitle: 'Bölge',
+    brushTitle: 'Fırça',
+    brushSize: (size: number): string => `${size}×${size}`,
+  },
+
+  zone: {
+    res: 'Konut',
+    com: 'Ticaret',
+    ind: 'Sanayi',
+    farm: 'Tarım',
+    park: 'Park',
+  },
+
+  hud: {
+    population: (value: number): string => `${plain.format(Math.round(value))} kişi`,
+    happiness: (value: number): string => `mutluluk ${Math.round(value)}`,
+    /** Net income per minute, signed. */
+    net: (value: number): string =>
+      `${value >= 0 ? '+' : '−'}${money.format(Math.abs(Math.round(value)))} ₺/dk`,
+    demand: 'K · T · S',
+  },
+
+  era: {
+    reached: (name: string): string => `${name} çağına ulaşıldı.`,
+    next: (name: string, remaining: number): string =>
+      `${name} çağına ${plain.format(Math.round(remaining))} kişi kaldı`,
   },
 
   road: {
@@ -61,7 +89,7 @@ export const STR = {
     rock: 'Kayalık',
   },
 
-  era: {
+  eraName: {
     founding: 'Kuruluş',
     village: 'Köy',
     town: 'Kasaba',

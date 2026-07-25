@@ -22,8 +22,19 @@
       <canvas id="map" aria-label="Şehir haritası"></canvas>
       <div id="ui">
         <div id="top-bar" class="bar">
-          <span id="hud-money" class="mono money">—</span>
-          <span id="hud-camera" class="mono dim">—</span>
+          <div class="hud-block">
+            <span id="hud-money" class="mono money">—</span>
+            <span id="hud-net" class="mono dim">—</span>
+          </div>
+          <div class="hud-block hud-right">
+            <span id="hud-population" class="mono dim">—</span>
+            <span id="hud-camera" class="mono dim">—</span>
+          </div>
+          <div id="demand" class="demand" aria-label="Konut, ticaret, sanayi talebi">
+            <span class="demand-bar"><i id="demand-res"></i></span>
+            <span class="demand-bar"><i id="demand-com"></i></span>
+            <span class="demand-bar"><i id="demand-ind"></i></span>
+          </div>
         </div>
 
         <div id="hint" class="hint">Henüz yol yok. Bir hat çiz, gerisi kendiliğinden gelir.</div>
