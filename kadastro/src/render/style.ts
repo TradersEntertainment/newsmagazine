@@ -91,6 +91,15 @@ export function styleForEra(era: Era): DrawStyle {
  */
 export function wobble(x: number, y: number, amount: number): number {
   if (amount === 0) return 0;
-  const h = Math.sin(x * 127.1 + y * 311.7) * 43758.5453;
-  return (h - Math.floor(h) - 0.5) * 2 * amount;
+  return (hashUnit(x, y, 0) - 0.5) * 2 * amount;
+}
+
+/**
+ * Deterministic 0..1 value per (tile, salt). Different salts give independent
+ * streams, so a tile can pick a tree count, a tree size and a lean without the
+ * three correlating into a visible pattern.
+ */
+export function hashUnit(x: number, y: number, salt: number): number {
+  const h = Math.sin(x * 127.1 + y * 311.7 + salt * 74.7) * 43758.5453;
+  return h - Math.floor(h);
 }

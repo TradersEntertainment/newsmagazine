@@ -31,7 +31,7 @@ npm test         # vitest
 | Faz | Kapsam | Durum |
 | --- | --- | --- |
 | 0 | İskelet, PWA, Safari düzeltmeleri, kamera, sabit zamanlı döngü, boş ızgara | Tamam |
-| 1 | Arazi üretimi ve yol çizimi | — |
+| 1 | Arazi üretimi ve yol çizimi | Tamam |
 | 2 | Bölgeler, binalar, temel ekonomi | — |
 | 3 | Trafik, şebekeler, hizmetler, difüzyon | — |
 | 4 | Çağlar, teknoloji, görevler, olaylar, offline, kayıt | — |

@@ -2,7 +2,14 @@ import { MAX_DPR } from '../data/balance';
 import type { Era } from '../sim/tiles';
 import type { World } from '../sim/world';
 import type { Camera } from './camera';
-import { drawTerrain } from './layers/terrain';
+import {
+  drawDraft,
+  drawInkDry,
+  drawRoads,
+  type DraftRender,
+  type InkDryEffect,
+} from './layers/roads';
+import { TerrainLayer } from './layers/terrain';
 import { styleForEra } from './style';
 
 /**
@@ -15,10 +22,20 @@ import { styleForEra } from './style';
 export interface RenderStats {
   fps: number;
   frameMs: number;
+  terrainRepaintMs: number;
+}
+
+export interface Scene {
+  world: World;
+  era: Era;
+  draft: DraftRender | null;
+  inkDry: readonly InkDryEffect[];
+  now: number;
 }
 
 export class Renderer {
   private readonly ctx: CanvasRenderingContext2D;
+  private readonly terrain = new TerrainLayer();
   private dpr = 1;
   private frameMs = 0;
   private fps = 0;
@@ -60,20 +77,27 @@ export class Renderer {
     this.camera.setViewport(width, height);
   }
 
-  /** One frame. Draw order: terrain → (roads → buildings → overlays, later). */
-  render(world: World, era: Era, deltaMs: number): void {
+  /** One frame. Draw order: terrain → roads → effects → draft. */
+  render(scene: Scene, deltaMs: number): void {
     const started = performance.now();
     const ctx = this.ctx;
-
     ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-    drawTerrain(ctx, world, this.camera, styleForEra(era));
+
+    this.terrain.draw(ctx, scene.world, this.camera, scene.era);
+    drawRoads(ctx, scene.world, this.camera, styleForEra(scene.era));
+    drawInkDry(ctx, this.camera, scene.inkDry, scene.now);
+    if (scene.draft) drawDraft(ctx, this.camera, scene.draft);
 
     this.frameMs = performance.now() - started;
     this.trackFps(deltaMs);
   }
 
+  invalidateTerrain(): void {
+    this.terrain.invalidate();
+  }
+
   get stats(): RenderStats {
-    return { fps: this.fps, frameMs: this.frameMs };
+    return { fps: this.fps, frameMs: this.frameMs, terrainRepaintMs: this.terrain.lastRepaintMs };
   }
 
   private trackFps(deltaMs: number): void {

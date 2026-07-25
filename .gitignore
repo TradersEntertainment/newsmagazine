@@ -5,7 +5,9 @@ node_modules/
 .env
 
 # SQLite Database and Data Folder
-data/
+# Anchored: unanchored "data/" also swallowed source directories named data/
+# in subprojects (e.g. kadastro/src/data), silently leaving them out of commits.
+/data/
 
 # Uploaded Files
 public/uploads/*

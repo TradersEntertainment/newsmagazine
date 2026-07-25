@@ -21,9 +21,19 @@
     <div id="app">
       <canvas id="map" aria-label="Şehir haritası"></canvas>
       <div id="ui">
-        <div id="top-bar" class="bar"><span id="hud-camera" class="mono">—</span></div>
+        <div id="top-bar" class="bar">
+          <span id="hud-money" class="mono money">—</span>
+          <span id="hud-camera" class="mono dim">—</span>
+        </div>
+
         <div id="hint" class="hint">Henüz yol yok. Bir hat çiz, gerisi kendiliğinden gelir.</div>
-        <div id="tool-dock" class="bar"><span class="dock-label">Faz 0 · iskelet</span></div>
+
+        <div id="cost-label" class="cost-label mono" data-hidden="true"></div>
+
+        <div id="bottom">
+          <div id="tool-sheet" class="sheet" data-open="false" aria-hidden="true"></div>
+          <div id="tool-dock" class="bar"></div>
+        </div>
       </div>
     </div>
     <script type="module" src="/src/main.ts"></script>

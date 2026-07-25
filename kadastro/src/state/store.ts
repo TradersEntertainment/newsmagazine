@@ -23,7 +23,17 @@ export interface UiState {
   hintVisible: boolean;
 }
 
+export interface SimSnapshot {
+  era: Era;
+  money: number;
+  population: number;
+  happiness: number;
+  taxRate: number;
+}
+
 export interface UiActions {
+  /** Push of the sim's public numbers; the store never reads sim state itself. */
+  syncFromSim(snapshot: SimSnapshot): void;
   setEra(era: Era): void;
   setTool(tool: ToolId): void;
   setOverlay(overlay: OverlayId): void;
@@ -44,6 +54,16 @@ export const uiStore = createStore<UiState & UiActions>()((set) => ({
   cameraReadout: '',
   hintVisible: true,
 
+  syncFromSim: (snapshot) =>
+    set((current) =>
+      current.money === snapshot.money &&
+      current.era === snapshot.era &&
+      current.population === snapshot.population &&
+      current.happiness === snapshot.happiness &&
+      current.taxRate === snapshot.taxRate
+        ? current
+        : { ...current, ...snapshot },
+    ),
   setEra: (era) => set({ era }),
   setTool: (activeTool) => set({ activeTool }),
   setOverlay: (overlay) => set({ overlay }),

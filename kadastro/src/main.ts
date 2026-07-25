@@ -1,44 +1,85 @@
 import './style.css';
 import { bindAudioUnlock } from './audio/context';
+import { INK_DRY_MS } from './data/balance';
 import { STR } from './data/strings.tr';
 import { bindPointerInput, bindWheelZoom } from './input/pointer';
+import type { TilePoint } from './input/pathGeometry';
+import { ToolController } from './input/tools';
 import { registerServiceWorker } from './pwa/registerSW';
 import { Camera } from './render/camera';
+import type { InkDryEffect } from './render/layers/roads';
 import { Renderer } from './render/renderer';
 import { Clock } from './sim/clock';
 import { creditAwayTime } from './sim/offline';
 import { hashSeed } from './sim/rng';
-import { createWorld, startingCentre } from './sim/world';
+import { createGameState } from './sim/state';
+import { UndoStack } from './sim/undo';
+import { startingCentre } from './sim/world';
 import { uiStore } from './state/store';
-import { mountDockLabel, mountHint, mountTopBar } from './ui/topBar';
+import { mountCostLabel } from './ui/costLabel';
+import * as haptics from './ui/haptics';
+import { mountToolDock } from './ui/toolDock';
+import { mountHint, mountTopBar } from './ui/topBar';
 
 /**
- * Phase 0 bootstrap: an empty cadastral sheet you can pan and pinch at 60 fps,
- * driven by a fixed-timestep clock. No tools, no economy — those arrive with
- * their own phases. This file wires modules together and owns nothing else.
+ * Bootstrap and frame loop. This file wires modules together and owns nothing
+ * except the ink-drying effect list, which is presentation state with no place
+ * in the sim.
  */
 const canvas = document.querySelector<HTMLCanvasElement>('#map');
 const ui = document.querySelector<HTMLElement>('#ui');
 if (!canvas || !ui) throw new Error('Game shell missing from index.html');
 
-const world = createWorld(hashSeed('kadastro'));
+const game = createGameState(hashSeed('kadastro'), Date.now());
 const camera = new Camera();
 const renderer = new Renderer(canvas, camera);
 const clock = new Clock();
+const undo = new UndoStack();
 
-const home = startingCentre(world);
+const home = startingCentre(game.world);
 camera.centreOn(home.x, home.y);
-camera.setBounds({ minX: 0, minY: 0, maxX: world.size, maxY: world.size });
+camera.setBounds({ minX: 0, minY: 0, maxX: game.world.size, maxY: game.world.size });
 
+const inkDry: InkDryEffect[] = [];
+
+const tools = new ToolController(game, camera, undo, {
+  onBuilt: (tiles: readonly TilePoint[]) => {
+    inkDry.push({ tiles: [...tiles], startedAt: performance.now() });
+    haptics.confirm();
+    uiStore.getState().hideHint();
+  },
+  onChanged: () => syncUi(),
+});
+
+const updateCostLabel = mountCostLabel(ui);
 mountTopBar(ui);
 mountHint(ui);
-mountDockLabel(ui);
+const dock = mountToolDock(ui, {
+  tools,
+  era: () => game.era,
+  onUndo: () => {
+    if (!tools.undoLast()) return;
+    haptics.tap();
+  },
+});
 
 const input = bindPointerInput(canvas, {
-  onCameraPan: (dx, dy) => camera.panByScreen(dx, dy),
+  onCameraPan: (dx, dy) => {
+    dock.closeSheet();
+    camera.panByScreen(dx, dy);
+  },
   onCameraZoom: (anchorX, anchorY, factor) => camera.zoomAt(anchorX, anchorY, factor),
-  onStrokeStart: () => uiStore.getState().hideHint(),
-  onTap: () => uiStore.getState().hideHint(),
+  onStrokeStart: (sample) => {
+    // The invitation copy sits mid-screen; get it out of the way of the ink
+    // the moment the player starts drawing, not once the road is paid for.
+    uiStore.getState().hideHint();
+    dock.closeSheet();
+    tools.strokeStart(sample.x, sample.y);
+  },
+  onTap: () => dock.closeSheet(),
+  onStrokeMove: (sample) => tools.strokeMove(sample.x, sample.y),
+  onStrokeEnd: () => tools.strokeEnd(),
+  onStrokeCancel: () => tools.cancelStroke(),
 });
 bindWheelZoom(canvas, (x, y, factor) => camera.zoomAt(x, y, factor));
 bindAudioUnlock(canvas);
@@ -57,19 +98,18 @@ renderer.resize();
 // --- Away-time bookkeeping ---------------------------------------------------
 // rAF stops when the tab backgrounds, so the gap is measured on visibility
 // rather than counted in frames, and handed to the offline system (§11).
-let lastSeen = Date.now();
-
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'hidden') {
-    lastSeen = Date.now();
+    game.lastSeen = Date.now();
     return;
   }
-  const away = creditAwayTime(lastSeen, Date.now());
+  const away = creditAwayTime(game.lastSeen, Date.now());
   if (away.rawMs > 1_000) {
-    // Phase 4 turns this into the City Chronicle; Phase 0 only proves the
-    // measurement survives a backgrounded tab.
-    console.info('[kadastro] away', Math.round(away.effectiveMs / 1000), 's effective');
+    // Phase 4 turns this into the City Chronicle; for now the measurement is
+    // simply kept honest.
+    game.playedMs += away.effectiveMs;
   }
+  game.lastSeen = Date.now();
   clock.resetAccumulators();
   lastFrame = performance.now();
   renderer.resize();
@@ -77,23 +117,49 @@ document.addEventListener('visibilitychange', () => {
 
 // --- Loop --------------------------------------------------------------------
 let lastFrame = performance.now();
+let readoutAccumulator = 0;
 
 function frame(now: number): void {
   const deltaMs = now - lastFrame;
   lastFrame = now;
 
   input.tick(now);
-  // Phase 0 has no systems to step yet; the budget is still consumed so the
-  // fixed timestep is exercised from day one rather than bolted on later.
-  clock.advance(deltaMs);
+  const budget = clock.advance(deltaMs);
+  game.tick += budget.simTicks;
+  game.playedMs = clock.playedMs;
 
-  renderer.render(world, uiStore.getState().era, deltaMs);
+  tools.update();
+  pruneInkDry(now);
+
+  renderer.render(
+    { world: game.world, era: game.era, draft: tools.draft, inkDry, now },
+    deltaMs,
+  );
+
+  updateCostLabel(tools.isDrawing ? tools.summary : null);
   publishReadout();
 
   requestAnimationFrame(frame);
 }
 
-let readoutAccumulator = 0;
+function pruneInkDry(now: number): void {
+  // Splice from the front: effects are pushed in time order, so the expired
+  // ones are always the earliest.
+  while (inkDry.length > 0 && now - (inkDry[0] as InkDryEffect).startedAt > INK_DRY_MS) {
+    inkDry.shift();
+  }
+}
+
+function syncUi(): void {
+  uiStore.getState().syncFromSim({
+    era: game.era,
+    money: game.money,
+    population: game.population,
+    happiness: game.happiness,
+    taxRate: game.taxRate,
+  });
+}
+
 function publishReadout(): void {
   // Store writes drive DOM updates; twice a second is plenty for diagnostics.
   readoutAccumulator += 1;
@@ -104,4 +170,5 @@ function publishReadout(): void {
   state.setFps(renderer.stats.fps);
 }
 
+syncUi();
 requestAnimationFrame(frame);
