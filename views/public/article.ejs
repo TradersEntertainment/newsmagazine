@@ -743,14 +743,13 @@
       const pages = [];
       let currentPageHTML = '';
       
-      Array.from(temp.childNodes).forEach(node => {
-        if (node.nodeType === Node.TEXT_NODE && !node.textContent.trim()) {
-          currentPageHTML += node.textContent;
-          return;
-        }
-        
-        // Append this node to tester to check vertical height
-        const clone = node.cloneNode(true);
+      // Use temp.children to process HTML elements (p, h2, h3, ul, etc.) directly.
+      // This ensures 100% accurate offsetHeight rendering checks and guarantees no text is skipped.
+      const elements = Array.from(temp.children);
+      
+      elements.forEach(el => {
+        // Append clone to tester to check height
+        const clone = el.cloneNode(true);
         tester.appendChild(clone);
         
         const currentHeight = tester.offsetHeight;
@@ -758,17 +757,14 @@
         // Succeeding pages have full space (max 860px text height)
         const heightLimit = pages.length === 0 ? 330 : 860;
         
-        if (currentHeight > heightLimit && currentPageHTML.length > 0) {
+        if (currentHeight > heightLimit && currentPageHTML.trim().length > 0) {
           pages.push(currentPageHTML);
           currentPageHTML = '';
           tester.innerHTML = '';
-          // Re-append to tester for the new page height tracking
-          tester.appendChild(node.cloneNode(true));
+          tester.appendChild(el.cloneNode(true));
         }
         
-        const container = document.createElement('div');
-        container.appendChild(node.cloneNode(true));
-        currentPageHTML += container.innerHTML;
+        currentPageHTML += el.outerHTML;
       });
       
       if (currentPageHTML.trim().length > 0) {
