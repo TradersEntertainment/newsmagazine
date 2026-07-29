@@ -322,10 +322,6 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
         <span>Görsel Olarak Paylaş</span>
       </button>
-      <button class="share-btn" id="btnDownloadPDFMain" type="button" style="background-color: #2B6CB0; color: white; border-color: #2B6CB0; display: inline-flex; align-items: center; gap: 6px;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-        <span>PDF İndir</span>
-      </button>
     </div>
   </div>
 </article>
@@ -559,7 +555,7 @@
 
   <div style="display: flex; gap: 40px; margin-bottom: 30px; align-items: flex-start;">
     <!-- Left Column: Title, Category, Cover Image, Key Takeaways, CTA Banner -->
-    <div style="width: 380px; flex-shrink: 0; display: flex; flex-direction: column;">
+    <div id="fullCardLeftCol" style="width: 380px; flex-shrink: 0; display: flex; flex-direction: column;">
       <% if (hasEditorAnalysis) { %>
         <div style="display: inline-flex; align-items: center; background-color: #C53030; color: #FFFFFF; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif; line-height: 1; align-self: flex-start;"><span style="margin-right: 4px; font-size: 11px; line-height: 1;">⭐</span> ÖZEL EDİTÖR ANALİZİ</div>
       <% } else if (article.category) { %>
@@ -596,12 +592,12 @@
 
     <!-- Right Column: Content & Commentary -->
     <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
-      <div class="card-full-content-block" style="font-size: 14.5px; line-height: 1.75; color: #1A1A1A; text-align: justify; font-family: 'Inter', sans-serif;">
+      <div class="card-full-content-block" id="fullCardContent" style="font-size: 14.5px; line-height: 1.75; color: #1A1A1A; text-align: justify; font-family: 'Inter', sans-serif;">
         <%- article.content %>
       </div>
 
       <% if (article.editor_analysis) { %>
-        <div class="card-editor-analysis" style="margin-top: 20px; padding: 20px; background-color: #FFF5F5; border-left: 4px solid #C53030; border-radius: 4px; font-family: 'Inter', sans-serif; text-align: left; box-sizing: border-box;">
+        <div class="card-editor-analysis" id="fullCardEditorAnalysis" style="margin-top: 20px; padding: 20px; background-color: #FFF5F5; border-left: 4px solid #C53030; border-radius: 4px; font-family: 'Inter', sans-serif; text-align: left; box-sizing: border-box;">
           <div style="font-weight: 800; font-family: 'Playfair Display', serif; font-size: 15px; color: #1A1A1A; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
             <span>⭐</span> <span>Editör Özel Analizi & Yorumu</span>
           </div>
@@ -613,6 +609,7 @@
   
   <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E8E4DE; padding-top: 20px;">
     <div style="font-size: 11px; color: #718096;"><%= formatDate(article.published_at || article.created_at) %></div>
+    <div id="fullCardPageNumber" style="font-size: 12px; font-weight: 700; color: #C53030; font-family: 'Inter', sans-serif;"></div>
     <div style="font-size: 12px; font-weight: 600; color: #1A1A1A;">europolitika.org</div>
   </div>
 </div>
@@ -636,9 +633,16 @@
       <!-- Dynamic generated img will be placed here -->
     </div>
     
+    <!-- Pagination controls for Full Article pagination (visible only when Full is active) -->
+    <div id="fullArticlePagination" style="display: none; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 16px; font-family: 'Inter', sans-serif; background: #EDF2F7; padding: 8px 12px; border-radius: 6px; box-sizing: border-box;">
+      <button id="btnPrevPage" type="button" style="padding: 6px 12px; background: #C53030; color: #fff; border: none; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; outline: none; transition: opacity 0.2s;">◀ Önceki Sayfa</button>
+      <span id="txtPaginationInfo" style="font-size: 12px; font-weight: 700; color: #2D3748;">Sayfa 1 / 1</span>
+      <button id="btnNextPage" type="button" style="padding: 6px 12px; background: #C53030; color: #fff; border: none; border-radius: 4px; font-size: 11px; font-weight: 700; cursor: pointer; outline: none; transition: opacity 0.2s;">Sonraki Sayfa ▶</button>
+    </div>
+
     <div style="display: flex; gap: 8px; width: 100%; font-family: 'Inter', sans-serif;">
       <button id="btnDownloadPreview" style="flex: 1; padding: 10px 14px; background: #C53030; color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s;">
-        📥 Görseli İndir
+        📥 Görselleri İndir
       </button>
       <button id="btnClosePreview" style="padding: 10px 14px; background: #E2E8F0; color: #4A5568; border: none; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; transition: background 0.2s;">
         Kapat
@@ -709,7 +713,6 @@
         // Replace the description blocks in templates
         const classicDesc = document.querySelector('#shareCardTemplate .card-description-block');
         if (classicDesc) classicDesc.innerHTML = classicListHtml;
-
         const darkDesc = document.querySelector('#shareCardTemplateDark .card-description-block');
         if (darkDesc) darkDesc.innerHTML = darkListHtml;
 
@@ -731,6 +734,47 @@
     
     let currentDataUrl = null;
     let activeTemplate = 'Classic'; // default template
+    let fullArticlePages = [];
+    let currentFullPageIdx = 0;
+
+    // Helper to paginate HTML content based on word count
+    const paginateContent = (htmlContent, wordsPerPage = 450) => {
+      const temp = document.createElement('div');
+      temp.innerHTML = htmlContent;
+      
+      const pages = [];
+      let currentPageHTML = '';
+      let currentWordCount = 0;
+      
+      const getWordCount = (el) => {
+        return el.textContent.trim().split(/\s+/).filter(w => w.length > 0).length;
+      };
+      
+      Array.from(temp.childNodes).forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE && !node.textContent.trim()) {
+          currentPageHTML += node.textContent;
+          return;
+        }
+        
+        const words = getWordCount(node);
+        if (currentWordCount + words > wordsPerPage && currentWordCount > 0) {
+          pages.push(currentPageHTML);
+          currentPageHTML = '';
+          currentWordCount = 0;
+        }
+        
+        const container = document.createElement('div');
+        container.appendChild(node.cloneNode(true));
+        currentPageHTML += container.innerHTML;
+        currentWordCount += words;
+      });
+      
+      if (currentPageHTML.trim().length > 0) {
+        pages.push(currentPageHTML);
+      }
+      
+      return pages;
+    };
 
     const renderActiveTemplate = async () => {
       let targetId = 'shareCardTemplate';
@@ -740,6 +784,46 @@
       if (activeTemplate === 'Full') targetId = 'shareCardTemplateFull';
       
       const shareCard = document.getElementById(targetId);
+      
+      // Handle Full Template pagination adjustments before render
+      if (activeTemplate === 'Full') {
+        if (fullArticlePages.length === 0) {
+          const originalContent = document.querySelector('.article-content').innerHTML;
+          fullArticlePages = paginateContent(originalContent, 450);
+        }
+        
+        document.getElementById('fullArticlePagination').style.display = 'flex';
+        document.getElementById('txtPaginationInfo').textContent = `Sayfa ${currentFullPageIdx + 1} / ${fullArticlePages.length}`;
+        
+        // Setup buttons status
+        document.getElementById('btnPrevPage').style.opacity = currentFullPageIdx === 0 ? '0.5' : '1';
+        document.getElementById('btnPrevPage').disabled = currentFullPageIdx === 0;
+        document.getElementById('btnNextPage').style.opacity = currentFullPageIdx === fullArticlePages.length - 1 ? '0.5' : '1';
+        document.getElementById('btnNextPage').disabled = currentFullPageIdx === fullArticlePages.length - 1;
+        
+        // Adjust template view based on current page
+        const leftCol = document.getElementById('fullCardLeftCol');
+        if (leftCol) {
+          leftCol.style.display = currentFullPageIdx === 0 ? 'flex' : 'none';
+        }
+        
+        const contentBlock = document.getElementById('fullCardContent');
+        if (contentBlock) {
+          contentBlock.innerHTML = fullArticlePages[currentFullPageIdx];
+        }
+        
+        const editorBox = document.getElementById('fullCardEditorAnalysis');
+        if (editorBox) {
+          editorBox.style.display = currentFullPageIdx === fullArticlePages.length - 1 ? 'block' : 'none';
+        }
+        
+        const pageNumFooter = document.getElementById('fullCardPageNumber');
+        if (pageNumFooter) {
+          pageNumFooter.textContent = `Sayfa ${currentFullPageIdx + 1} / ${fullArticlePages.length}`;
+        }
+      } else {
+        document.getElementById('fullArticlePagination').style.display = 'none';
+      }
       
       try {
         previewContainer.innerHTML = '<div style="padding: 40px; font-family: Inter; color: #888; font-size: 14px; text-align: center;">⏳ Kart Hazırlanıyor...</div>';
@@ -776,6 +860,7 @@
       try {
         // Reset active template to Classic when opening
         activeTemplate = 'Classic';
+        currentFullPageIdx = 0;
         updateTabButtonStyles();
         
         // Show Modal immediately
@@ -820,9 +905,25 @@
         if (templateName === activeTemplate) return;
         
         activeTemplate = templateName;
+        currentFullPageIdx = 0;
         updateTabButtonStyles();
         await renderActiveTemplate();
       });
+    });
+
+    // Pagination Click Listeners
+    document.getElementById('btnPrevPage').addEventListener('click', async () => {
+      if (currentFullPageIdx > 0) {
+        currentFullPageIdx--;
+        await renderActiveTemplate();
+      }
+    });
+
+    document.getElementById('btnNextPage').addEventListener('click', async () => {
+      if (currentFullPageIdx < fullArticlePages.length - 1) {
+        currentFullPageIdx++;
+        await renderActiveTemplate();
+      }
     });
 
     // Close Modal helper
@@ -843,18 +944,82 @@
       if (e.target === modal) closeShareModal();
     });
 
+    // Helper function to sleep/wait
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
     // Bind download action
-    btnDownload.addEventListener('click', () => {
-      if (!currentDataUrl) return;
-      const link = document.createElement('a');
-      link.download = '<%= article.slug %>-paylas.png';
-      link.href = currentDataUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      if (window.showToast) {
-        window.showToast('Görsel kartı başarıyla indirildi! 📷', 'success');
+    btnDownload.addEventListener('click', async () => {
+      if (activeTemplate === 'Full') {
+        if (fullArticlePages.length === 0) return;
+        
+        btnDownload.disabled = true;
+        const originalHTML = btnDownload.innerHTML;
+        btnDownload.innerHTML = '⏳ Görseller İndiriliyor...';
+        
+        const originalPageIdx = currentFullPageIdx;
+        const leftCol = document.getElementById('fullCardLeftCol');
+        const contentBlock = document.getElementById('fullCardContent');
+        const editorBox = document.getElementById('fullCardEditorAnalysis');
+        const pageNumFooter = document.getElementById('fullCardPageNumber');
+        const shareCard = document.getElementById('shareCardTemplateFull');
+        
+        try {
+          for (let i = 0; i < fullArticlePages.length; i++) {
+            // Apply current page values to template for canvas generation
+            if (leftCol) leftCol.style.display = i === 0 ? 'flex' : 'none';
+            if (contentBlock) contentBlock.innerHTML = fullArticlePages[i];
+            if (editorBox) editorBox.style.display = i === fullArticlePages.length - 1 ? 'block' : 'none';
+            if (pageNumFooter) pageNumFooter.textContent = `Sayfa ${i + 1} / ${fullArticlePages.length}`;
+            
+            // Generate canvas
+            const canvas = await html2canvas(shareCard, {
+              allowTaint: true,
+              useCORS: true,
+              scale: 2,
+              backgroundColor: '#F8F7F4'
+            });
+            
+            const dataUrl = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `<%= article.slug %>-paylas-sayfa${i + 1}.png`;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Short delay to avoid download blocking/congestion
+            await sleep(350);
+          }
+          
+          if (window.showToast) {
+            window.showToast(`${fullArticlePages.length} adet paylaşım kartı başarıyla indirildi! 📷`, 'success');
+          }
+        } catch (err) {
+          console.error('Multi-page Download Error:', err);
+          alert('Görseller indirilirken bir hata oluştu.');
+        } finally {
+          // Restore user's current preview state
+          if (leftCol) leftCol.style.display = originalPageIdx === 0 ? 'flex' : 'none';
+          if (contentBlock) contentBlock.innerHTML = fullArticlePages[originalPageIdx];
+          if (editorBox) editorBox.style.display = originalPageIdx === fullArticlePages.length - 1 ? 'block' : 'none';
+          if (pageNumFooter) pageNumFooter.textContent = `Sayfa ${originalPageIdx + 1} / ${fullArticlePages.length}`;
+          
+          btnDownload.disabled = false;
+          btnDownload.innerHTML = originalHTML;
+        }
+      } else {
+        // Simple single download for other templates
+        if (!currentDataUrl) return;
+        const link = document.createElement('a');
+        link.download = '<%= article.slug %>-paylas.png';
+        link.href = currentDataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        if (window.showToast) {
+          window.showToast('Görsel kartı başarıyla indirildi! 📷', 'success');
+        }
       }
     });
 
