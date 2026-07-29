@@ -322,6 +322,10 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
         <span>Görsel Olarak Paylaş</span>
       </button>
+      <button class="share-btn" id="btnDownloadPDFMain" type="button" style="background-color: #2B6CB0; color: white; border-color: #2B6CB0; display: inline-flex; align-items: center; gap: 6px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        <span>PDF İndir</span>
+      </button>
     </div>
   </div>
 </article>
@@ -634,10 +638,7 @@
     
     <div style="display: flex; gap: 8px; width: 100%; font-family: 'Inter', sans-serif;">
       <button id="btnDownloadPreview" style="flex: 1; padding: 10px 14px; background: #C53030; color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s;">
-        📥 Görsel İndir
-      </button>
-      <button id="btnDownloadPDF" style="flex: 1; padding: 10px 14px; background: #2B6CB0; color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s;">
-        📄 PDF İndir
+        📥 Görseli İndir
       </button>
       <button id="btnClosePreview" style="padding: 10px 14px; background: #E2E8F0; color: #4A5568; border: none; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; transition: background 0.2s;">
         Kapat
@@ -857,43 +858,89 @@
       }
     });
 
-    // Bind PDF download action
-    const btnDownloadPDF = document.getElementById('btnDownloadPDF');
-    btnDownloadPDF.addEventListener('click', () => {
-      let targetId = 'shareCardTemplate';
-      if (activeTemplate === 'Dark') targetId = 'shareCardTemplateDark';
-      if (activeTemplate === 'Quote') targetId = 'shareCardTemplateQuote';
-      if (activeTemplate === 'Tall') targetId = 'shareCardTemplateTall';
-      if (activeTemplate === 'Full') targetId = 'shareCardTemplateFull';
-      
-      const shareCard = document.getElementById(targetId);
-      
-      const opt = {
-        margin: [10, 10, 10, 10],
-        filename: '<%= article.slug %>.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, allowTaint: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-      };
-      
-      btnDownloadPDF.disabled = true;
-      const originalText = btnDownloadPDF.innerHTML;
-      btnDownloadPDF.innerHTML = '⏳ Hazırlanıyor...';
-      
-      html2pdf().from(shareCard).set(opt).save().then(() => {
-        btnDownloadPDF.disabled = false;
-        btnDownloadPDF.innerHTML = originalText;
-        if (window.showToast) {
-          window.showToast('PDF başarıyla indirildi! 📄', 'success');
-        }
-      }).catch(err => {
-        console.error('PDF Generation Error:', err);
-        btnDownloadPDF.disabled = false;
-        btnDownloadPDF.innerHTML = originalText;
-        alert('PDF oluşturulurken bir hata oluştu.');
+    // Bind standalone PDF download action (outside modal, uses article content directly)
+    const btnDownloadPDFMain = document.getElementById('btnDownloadPDFMain');
+    if (btnDownloadPDFMain) {
+      btnDownloadPDFMain.addEventListener('click', () => {
+        // Build a clean, styled clone of the article for PDF rendering
+        const pdfContainer = document.createElement('div');
+        pdfContainer.style.cssText = 'position: fixed; left: -9999px; top: 0; width: 800px; background: #FFFFFF; padding: 40px 48px; font-family: Inter, sans-serif; color: #1A1A1A; box-sizing: border-box;';
+        
+        // Header with logo and category
+        let headerHTML = '<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #C53030; padding-bottom: 16px; margin-bottom: 24px;">';
+        headerHTML += '<div style="font-family: Playfair Display, serif; font-size: 22px; font-weight: 800; color: #C53030;">EuroPolitika</div>';
+        headerHTML += '<div style="font-size: 11px; color: #718096;"><%= article.category ? article.category : "Analiz" %> · <%= formatDate(article.published_at || article.created_at) %></div>';
+        headerHTML += '</div>';
+        
+        // Title
+        headerHTML += '<h1 style="font-family: Playfair Display, serif; font-size: 26px; font-weight: 800; line-height: 1.3; color: #1A1A1A; margin: 0 0 20px 0;"><%= article.title %></h1>';
+        
+        // Key Takeaways
+        <% if (article.key_takeaways) { %>
+        headerHTML += '<div style="background: #F7FAFC; border-left: 4px solid #3182CE; padding: 16px 20px; border-radius: 4px; margin-bottom: 24px;">';
+        headerHTML += '<div style="font-size: 11px; font-weight: 700; color: #3182CE; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px;">💡 Öne Çıkanlar</div>';
+        headerHTML += '<ul style="margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.6; color: #2D3748;">';
+        '<%= article.key_takeaways %>'.split('\n').map(l => l.trim()).filter(l => l.length > 2).forEach(b => {
+          headerHTML += '<li style="margin-bottom: 4px;">' + b + '</li>';
+        });
+        headerHTML += '</ul></div>';
+        <% } %>
+        
+        pdfContainer.innerHTML = headerHTML;
+        
+        // Clone article content
+        const contentClone = document.querySelector('.article-content').cloneNode(true);
+        contentClone.style.cssText = 'font-size: 14px; line-height: 1.75; color: #1A1A1A; text-align: justify;';
+        pdfContainer.appendChild(contentClone);
+        
+        // Editor analysis
+        <% if (article.editor_analysis) { %>
+        const editorBox = document.createElement('div');
+        editorBox.style.cssText = 'margin-top: 24px; padding: 20px; background: #FFF5F5; border-left: 4px solid #C53030; border-radius: 4px;';
+        editorBox.innerHTML = '<div style="font-weight: 800; font-size: 14px; color: #1A1A1A; margin-bottom: 10px;">⭐ Editör Özel Analizi & Yorumu</div>' +
+          '<div style="font-size: 13px; line-height: 1.65; color: #2D3748; white-space: pre-wrap;"><%= article.editor_analysis.replace(/'/g, "\\'").replace(/\n/g, "\\n") %></div>';
+        pdfContainer.appendChild(editorBox);
+        <% } %>
+        
+        // Footer
+        const footerEl = document.createElement('div');
+        footerEl.style.cssText = 'margin-top: 30px; padding-top: 16px; border-top: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #A0AEC0;';
+        footerEl.innerHTML = '<span>© EuroPolitika · europolitika.org</span><span>AI Destekli Analiz Sistemi</span>';
+        pdfContainer.appendChild(footerEl);
+        
+        document.body.appendChild(pdfContainer);
+        
+        const opt = {
+          margin: [15, 15, 15, 15],
+          filename: '<%= article.slug %>.pdf',
+          image: { type: 'jpeg', quality: 0.95 },
+          html2canvas: { scale: 2, useCORS: true, allowTaint: true, scrollY: 0 },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+        
+        btnDownloadPDFMain.disabled = true;
+        const originalHTML = btnDownloadPDFMain.innerHTML;
+        btnDownloadPDFMain.innerHTML = '<span>⏳ PDF Hazırlanıyor...</span>';
+        
+        html2pdf().from(pdfContainer).set(opt).save().then(() => {
+          document.body.removeChild(pdfContainer);
+          btnDownloadPDFMain.disabled = false;
+          btnDownloadPDFMain.innerHTML = originalHTML;
+          if (window.showToast) {
+            window.showToast('PDF başarıyla indirildi! 📄', 'success');
+          }
+        }).catch(err => {
+          console.error('PDF Generation Error:', err);
+          document.body.removeChild(pdfContainer);
+          btnDownloadPDFMain.disabled = false;
+          btnDownloadPDFMain.innerHTML = originalHTML;
+          if (window.showToast) {
+            window.showToast('PDF oluşturulurken bir hata oluştu.', 'error');
+          }
+        });
       });
-    });
+    }
 
     // Fetch live market data from backend Yahoo Finance proxy
     async function fetchMarketData() {
