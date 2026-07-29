@@ -558,14 +558,14 @@
   </div>
 
   <% if (article.cover_image) { %>
-    <div id="fullCardCoverImage" style="width: 100%; height: 320px; display: flex; align-items: center; justify-content: center; background-color: transparent; border-radius: 8px; overflow: hidden; margin-bottom: 24px; border: none; padding: 0; box-sizing: border-box;">
+    <div id="fullCardCoverImage" style="width: 100%; height: 260px; display: flex; align-items: center; justify-content: center; background-color: transparent; border-radius: 8px; overflow: hidden; margin-bottom: 24px; border: none; padding: 0; box-sizing: border-box;">
       <img src="<%= article.cover_image %>" style="max-width: 100%; max-height: 100%; object-fit: contain; display: block;" crossorigin="anonymous">
     </div>
   <% } %>
 
   <div id="fullCardLeftCol" style="display: flex; flex-direction: column; margin-bottom: 24px;">
     <% if (hasEditorAnalysis) { %>
-      <div style="display: inline-flex; align-items: center; background-color: #C53030; color: #FFFFFF; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif; line-height: 1; align-self: flex-start;"><span style="margin-right: 4px; font-size: 11px; line-height: 1;">⭐</span> ÖZEL EDİTÖR ANALİZİ</div>
+      <div style="display: inline-flex; align-items: center; background-color: #C53030; color: #FFFFFF; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif; line-height: 1; align-self: flex-start;"><span style="margin-right: 4px; font-size: 11px; line-height: 1;">⭐</span> ANALİZ</div>
     <% } %>
     
     <h1 style="font-family: 'Playfair Display', serif; font-size: 24px; line-height: 1.35; color: #1A1A1A; margin-top: 0; margin-bottom: 16px; font-weight: 800;"><%= article.title %></h1>
@@ -591,7 +591,7 @@
   <% if (article.editor_analysis) { %>
     <div class="card-editor-analysis" id="fullCardEditorAnalysis" style="margin-top: 20px; padding: 20px; background-color: #FFF5F5; border-left: 4px solid #C53030; border-radius: 4px; font-family: 'Inter', sans-serif; text-align: left; box-sizing: border-box;">
       <div style="font-weight: 800; font-family: 'Playfair Display', serif; font-size: 15px; color: #1A1A1A; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-        <span>⭐</span> <span>Editör Özel Analizi & Yorumu</span>
+        <span>⭐</span> <span>Analiz</span>
       </div>
       <div style="font-size: 13.5px; line-height: 1.6; color: #2D3748; white-space: pre-wrap;"><%= article.editor_analysis %></div>
     </div>
@@ -730,8 +730,13 @@
     let fullArticlePages = [];
     let currentFullPageIdx = 0;
 
-    // Helper to paginate HTML content based on word count per page (ensuring zero text loss)
+    // Helper to paginate HTML content based on hybrid word limit & vertical pixel height
     const paginateContent = (htmlContent) => {
+      // Create a temporary hidden container with the exact same width and font properties
+      const tester = document.createElement('div');
+      tester.style.cssText = 'position: absolute; left: -9999px; top: -9999px; width: 870px; font-size: 14.5px; line-height: 1.72; font-family: Inter, sans-serif; text-align: justify; box-sizing: border-box;';
+      document.body.appendChild(tester);
+
       const temp = document.createElement('div');
       temp.innerHTML = htmlContent;
       
@@ -748,14 +753,26 @@
       
       elements.forEach(el => {
         const words = getWordCount(el);
-        // Page 1 limit: 300 words (fits cover image and takeaways)
-        // Succeeding pages limit: 480 words (perfectly fits 1250px container with 14.5px/1.72 font style)
-        const limit = pages.length === 0 ? 300 : 480;
         
-        if (currentWordCount + words > limit && currentWordCount > 0) {
+        // Append clone to tester to check height
+        const clone = el.cloneNode(true);
+        tester.appendChild(clone);
+        
+        const currentHeight = tester.offsetHeight;
+        
+        const isPage1 = pages.length === 0;
+        const wordLimit = isPage1 ? 320 : 490; // target 450-500 words for later pages
+        const heightLimit = isPage1 ? 410 : 890; // safe pixel height limits
+        
+        // Enforce min 200 words for page 1 before splitting
+        const enforceMinWords = isPage1 ? (currentWordCount >= 200) : true;
+        
+        if (currentWordCount > 0 && enforceMinWords && (currentWordCount + words > wordLimit || currentHeight > heightLimit)) {
           pages.push(currentPageHTML);
           currentPageHTML = '';
           currentWordCount = 0;
+          tester.innerHTML = '';
+          tester.appendChild(el.cloneNode(true));
         }
         
         currentPageHTML += el.outerHTML;
@@ -766,6 +783,7 @@
         pages.push(currentPageHTML);
       }
       
+      document.body.removeChild(tester);
       return pages;
     };
 
