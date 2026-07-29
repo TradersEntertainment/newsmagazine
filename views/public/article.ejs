@@ -512,7 +512,7 @@
 </div>
 
 <!-- Hidden container for generating shareable image card (Full Article Screenshot style) -->
-<div id="shareCardTemplateFull" style="position: absolute; left: -9999px; top: -9999px; width: 960px; background-color: #F8F7F4; padding: 45px; box-sizing: border-box; border: 4px solid #C53030; border-radius: 12px; font-family: 'Inter', sans-serif;">
+<div id="shareCardTemplateFull" style="position: absolute; left: -9999px; top: -9999px; width: 960px; background-color: #F8F7F4; padding: 45px 45px 75px 45px; box-sizing: border-box; border: 4px solid #C53030; border-radius: 12px; font-family: 'Inter', sans-serif; min-height: 1250px; display: flex; flex-direction: column; justify-content: space-between;">
   <style>
     #shareCardTemplateFull .card-full-content-block p {
       margin-top: 0 !important;
@@ -554,8 +554,8 @@
   </div>
 
   <% if (article.cover_image) { %>
-    <div style="width: 100%; height: 280px; border-radius: 8px; overflow: hidden; margin-bottom: 24px; border: 1px solid #E8E4DE;">
-      <img src="<%= article.cover_image %>" style="width: 100%; height: 100%; object-fit: cover;" crossorigin="anonymous">
+    <div style="width: 100%; height: 320px; display: flex; align-items: center; justify-content: center; background-color: #F1EFEA; border-radius: 8px; overflow: hidden; margin-bottom: 24px; border: 1px solid #E8E4DE; padding: 10px; box-sizing: border-box;">
+      <img src="<%= article.cover_image %>" style="max-width: 100%; max-height: 100%; object-fit: contain; display: block;" crossorigin="anonymous">
     </div>
   <% } %>
 
@@ -595,7 +595,7 @@
     </div>
   <% } %>
   
-  <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E8E4DE; padding-top: 20px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E8E4DE; padding-top: 20px; margin-top: auto; box-sizing: border-box; width: 100%;">
     <div style="font-size: 11px; color: #718096;"><%= formatDate(article.published_at || article.created_at) %></div>
     <div id="fullCardPageNumber" style="font-size: 12px; font-weight: 700; color: #C53030; font-family: 'Inter', sans-serif;"></div>
     <div style="font-size: 12px; font-weight: 600; color: #1A1A1A;">europolitika.org</div>
@@ -962,6 +962,9 @@
             if (editorBox) editorBox.style.display = i === fullArticlePages.length - 1 ? 'block' : 'none';
             if (pageNumFooter) pageNumFooter.textContent = `Sayfa ${i + 1} / ${fullArticlePages.length}`;
             
+            // Critical: Wait for DOM to render modifications before canvas capture
+            await sleep(350);
+            
             // Generate canvas
             const canvas = await html2canvas(shareCard, {
               allowTaint: true,
@@ -979,7 +982,7 @@
             document.body.removeChild(link);
             
             // Short delay to avoid download blocking/congestion
-            await sleep(350);
+            await sleep(250);
           }
           
           if (window.showToast) {
@@ -1023,10 +1026,10 @@
         btnDownloadPDF.innerHTML = '⏳ PDF Derleniyor...';
 
         try {
-          // jsPDF is bundled inside html2pdf.bundle.min.js
           const { jsPDF } = window.jspdf;
           const pdf = new jsPDF('p', 'mm', 'a4');
           const pageWidth = pdf.internal.pageSize.getWidth();
+          const pageHeight = pdf.internal.pageSize.getHeight();
           const margin = 8;
           const usableWidth = pageWidth - (margin * 2);
 
@@ -1040,11 +1043,14 @@
             const originalPageIdx = currentFullPageIdx;
 
             for (let i = 0; i < fullArticlePages.length; i++) {
-              // Set page content (same logic as image download — proven to work)
+              // Set page content (same logic as image download)
               if (leftCol) leftCol.style.display = i === 0 ? 'flex' : 'none';
               if (contentBlock) contentBlock.innerHTML = fullArticlePages[i];
               if (editorBox) editorBox.style.display = i === fullArticlePages.length - 1 ? 'block' : 'none';
               if (pageNumFooter) pageNumFooter.textContent = `Sayfa ${i + 1} / ${fullArticlePages.length}`;
+
+              // Critical: Wait for DOM to render modifications before canvas capture
+              await sleep(350);
 
               const canvas = await html2canvas(shareCard, {
                 allowTaint: true,
@@ -1057,6 +1063,11 @@
               const imgHeight = (canvas.height * usableWidth) / canvas.width;
 
               if (i > 0) pdf.addPage();
+              
+              // Fill background color first to avoid white edges in A4 PDF
+              pdf.setFillColor(248, 247, 244); // #F8F7F4
+              pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+              
               pdf.addImage(imgData, 'JPEG', margin, margin, usableWidth, imgHeight);
             }
 
@@ -1068,6 +1079,8 @@
           } else {
             // Single-page templates (Classic, Dark, Quote, Tall, or single-page Full)
             let targetId = 'shareCardTemplate';
+            const bgHex = activeTemplate === 'Dark' ? '#121212' : '#F8F7F4';
+            
             if (activeTemplate === 'Dark') targetId = 'shareCardTemplateDark';
             if (activeTemplate === 'Quote') targetId = 'shareCardTemplateQuote';
             if (activeTemplate === 'Tall') targetId = 'shareCardTemplateTall';
@@ -1078,11 +1091,20 @@
               allowTaint: true,
               useCORS: true,
               scale: 2,
-              backgroundColor: activeTemplate === 'Dark' ? '#121212' : '#F8F7F4'
+              backgroundColor: bgHex
             });
 
             const imgData = canvas.toDataURL('image/jpeg', 0.92);
             const imgHeight = (canvas.height * usableWidth) / canvas.width;
+            
+            // Fill background color first to avoid white edges in A4 PDF
+            if (activeTemplate === 'Dark') {
+              pdf.setFillColor(18, 18, 18); // #121212
+            } else {
+              pdf.setFillColor(248, 247, 244); // #F8F7F4
+            }
+            pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+            
             pdf.addImage(imgData, 'JPEG', margin, margin, usableWidth, imgHeight);
           }
 
