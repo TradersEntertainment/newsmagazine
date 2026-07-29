@@ -419,7 +419,7 @@
   
   <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E8E4DE; padding-top: 20px;">
     <div style="font-size: 12px; color: #718096;"><%= formatDate(article.published_at || article.created_at) %></div>
-    <div style="font-size: 13px; font-weight: 600; color: #1A1A1A;">europolitika.up.railway.app</div>
+    <div style="font-size: 13px; font-weight: 600; color: #1A1A1A;">europolitika.org</div>
   </div>
 </div>
 
@@ -450,7 +450,7 @@
   
   <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #2D3748; padding-top: 20px;">
     <div style="font-size: 12px; color: #A0AEC0;"><%= formatDate(article.published_at || article.created_at) %></div>
-    <div style="font-size: 13px; font-weight: 600; color: #FFFFFF;">europolitika.up.railway.app</div>
+    <div style="font-size: 13px; font-weight: 600; color: #FFFFFF;">europolitika.org</div>
   </div>
 </div>
 
@@ -473,7 +473,7 @@
   
   <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E8E4DE; padding-top: 20px; text-align: left;">
     <div style="font-size: 12px; color: #718096;"><%= formatDate(article.published_at || article.created_at) %></div>
-    <div style="font-size: 13px; font-weight: 600; color: #1A1A1A;">europolitika.up.railway.app</div>
+    <div style="font-size: 13px; font-weight: 600; color: #1A1A1A;">europolitika.org</div>
   </div>
 </div>
 
@@ -511,7 +511,7 @@
   
   <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E8E4DE; padding-top: 20px;">
     <div style="font-size: 11px; color: #718096;"><%= formatDate(article.published_at || article.created_at) %></div>
-    <div style="font-size: 12px; font-weight: 600; color: #1A1A1A;">europolitika.up.railway.app</div>
+    <div style="font-size: 12px; font-weight: 600; color: #1A1A1A;">europolitika.org</div>
   </div>
 </div>
 
@@ -613,7 +613,7 @@
   
   <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E8E4DE; padding-top: 20px;">
     <div style="font-size: 11px; color: #718096;"><%= formatDate(article.published_at || article.created_at) %></div>
-    <div style="font-size: 12px; font-weight: 600; color: #1A1A1A;">europolitika.up.railway.app</div>
+    <div style="font-size: 12px; font-weight: 600; color: #1A1A1A;">europolitika.org</div>
   </div>
 </div>
 
@@ -862,9 +862,15 @@
     const btnDownloadPDFMain = document.getElementById('btnDownloadPDFMain');
     if (btnDownloadPDFMain) {
       btnDownloadPDFMain.addEventListener('click', () => {
-        // Build a clean, styled clone of the article for PDF rendering
+        // Create a full-screen overlay to hide rendering
+        const overlay = document.createElement('div');
+        overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 999998; display: flex; align-items: center; justify-content: center; font-family: Inter, sans-serif;';
+        overlay.innerHTML = '<div style="background: #fff; padding: 32px 48px; border-radius: 12px; text-align: center;"><div style="font-size: 28px; margin-bottom: 12px;">⏳</div><div style="font-size: 16px; font-weight: 600; color: #1A1A1A;">PDF Hazırlanıyor...</div><div style="font-size: 13px; color: #718096; margin-top: 8px;">Lütfen bekleyin</div></div>';
+        document.body.appendChild(overlay);
+        
+        // Build a clean, styled container ON-SCREEN (html2canvas cannot render off-screen elements)
         const pdfContainer = document.createElement('div');
-        pdfContainer.style.cssText = 'position: fixed; left: -9999px; top: 0; width: 800px; background: #FFFFFF; padding: 40px 48px; font-family: Inter, sans-serif; color: #1A1A1A; box-sizing: border-box;';
+        pdfContainer.style.cssText = 'position: fixed; top: 0; left: 0; width: 800px; background: #FFFFFF; padding: 40px 48px; font-family: Inter, sans-serif; color: #1A1A1A; box-sizing: border-box; z-index: 999999; overflow: auto; max-height: 100vh;';
         
         // Header with logo and category
         let headerHTML = '<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #C53030; padding-bottom: 16px; margin-bottom: 24px;">';
@@ -910,35 +916,40 @@
         
         document.body.appendChild(pdfContainer);
         
-        const opt = {
-          margin: [15, 15, 15, 15],
-          filename: '<%= article.slug %>.pdf',
-          image: { type: 'jpeg', quality: 0.95 },
-          html2canvas: { scale: 2, useCORS: true, allowTaint: true, scrollY: 0 },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-        };
-        
         btnDownloadPDFMain.disabled = true;
         const originalHTML = btnDownloadPDFMain.innerHTML;
         btnDownloadPDFMain.innerHTML = '<span>⏳ PDF Hazırlanıyor...</span>';
         
-        html2pdf().from(pdfContainer).set(opt).save().then(() => {
-          document.body.removeChild(pdfContainer);
-          btnDownloadPDFMain.disabled = false;
-          btnDownloadPDFMain.innerHTML = originalHTML;
-          if (window.showToast) {
-            window.showToast('PDF başarıyla indirildi! 📄', 'success');
-          }
-        }).catch(err => {
-          console.error('PDF Generation Error:', err);
-          document.body.removeChild(pdfContainer);
-          btnDownloadPDFMain.disabled = false;
-          btnDownloadPDFMain.innerHTML = originalHTML;
-          if (window.showToast) {
-            window.showToast('PDF oluşturulurken bir hata oluştu.', 'error');
-          }
-        });
+        // Small delay to ensure DOM has rendered the on-screen element
+        setTimeout(() => {
+          const opt = {
+            margin: [10, 10, 10, 10],
+            filename: '<%= article.slug %>.pdf',
+            image: { type: 'jpeg', quality: 0.95 },
+            html2canvas: { scale: 2, useCORS: true, allowTaint: true, scrollX: 0, scrollY: 0, windowWidth: 800 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+          };
+          
+          html2pdf().from(pdfContainer).set(opt).save().then(() => {
+            document.body.removeChild(pdfContainer);
+            document.body.removeChild(overlay);
+            btnDownloadPDFMain.disabled = false;
+            btnDownloadPDFMain.innerHTML = originalHTML;
+            if (window.showToast) {
+              window.showToast('PDF başarıyla indirildi! 📄', 'success');
+            }
+          }).catch(err => {
+            console.error('PDF Generation Error:', err);
+            if (pdfContainer.parentNode) document.body.removeChild(pdfContainer);
+            if (overlay.parentNode) document.body.removeChild(overlay);
+            btnDownloadPDFMain.disabled = false;
+            btnDownloadPDFMain.innerHTML = originalHTML;
+            if (window.showToast) {
+              window.showToast('PDF oluşturulurken bir hata oluştu.', 'error');
+            }
+          });
+        }, 300);
       });
     }
 
