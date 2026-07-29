@@ -539,7 +539,11 @@
       padding-bottom: 10px !important;
       box-sizing: border-box !important;
     }
-    #shareCardTemplateFull .card-full-content-block img.image-placeholder {
+    #shareCardTemplateFull .card-full-content-block img.image-placeholder,
+    #shareCardTemplateFull .card-full-content-block .image-placeholder,
+    #shareCardTemplateFull .card-full-content-block .img-placeholder,
+    #shareCardTemplateFull .card-full-content-block .gorsel-placeholder,
+    #shareCardTemplateFull .card-full-content-block div[style*="background-color"] {
       display: none !important;
     }
     #shareCardTemplateFull .card-full-content-block p:empty,
@@ -554,7 +558,7 @@
   </div>
 
   <% if (article.cover_image) { %>
-    <div style="width: 100%; height: 320px; display: flex; align-items: center; justify-content: center; background-color: #F1EFEA; border-radius: 8px; overflow: hidden; margin-bottom: 24px; border: 1px solid #E8E4DE; padding: 10px; box-sizing: border-box;">
+    <div id="fullCardCoverImage" style="width: 100%; height: 320px; display: flex; align-items: center; justify-content: center; background-color: transparent; border-radius: 8px; overflow: hidden; margin-bottom: 24px; border: none; padding: 0; box-sizing: border-box;">
       <img src="<%= article.cover_image %>" style="max-width: 100%; max-height: 100%; object-fit: contain; display: block;" crossorigin="anonymous">
     </div>
   <% } %>
@@ -562,8 +566,6 @@
   <div id="fullCardLeftCol" style="display: flex; flex-direction: column; margin-bottom: 24px;">
     <% if (hasEditorAnalysis) { %>
       <div style="display: inline-flex; align-items: center; background-color: #C53030; color: #FFFFFF; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif; line-height: 1; align-self: flex-start;"><span style="margin-right: 4px; font-size: 11px; line-height: 1;">⭐</span> ÖZEL EDİTÖR ANALİZİ</div>
-    <% } else if (article.category) { %>
-      <div style="font-size: 12px; font-weight: 700; color: #C53030; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;"><%= article.category %></div>
     <% } %>
     
     <h1 style="font-family: 'Playfair Display', serif; font-size: 24px; line-height: 1.35; color: #1A1A1A; margin-top: 0; margin-bottom: 16px; font-weight: 800;"><%= article.title %></h1>
@@ -800,6 +802,11 @@
           leftCol.style.display = currentFullPageIdx === 0 ? 'flex' : 'none';
         }
         
+        const coverImg = document.getElementById('fullCardCoverImage');
+        if (coverImg) {
+          coverImg.style.display = currentFullPageIdx === 0 ? 'flex' : 'none';
+        }
+        
         const contentBlock = document.getElementById('fullCardContent');
         if (contentBlock) {
           contentBlock.innerHTML = fullArticlePages[currentFullPageIdx];
@@ -951,6 +958,7 @@
         
         const originalPageIdx = currentFullPageIdx;
         const leftCol = document.getElementById('fullCardLeftCol');
+        const coverImg = document.getElementById('fullCardCoverImage');
         const contentBlock = document.getElementById('fullCardContent');
         const editorBox = document.getElementById('fullCardEditorAnalysis');
         const pageNumFooter = document.getElementById('fullCardPageNumber');
@@ -960,6 +968,7 @@
           for (let i = 0; i < fullArticlePages.length; i++) {
             // Apply current page values to template for canvas generation
             if (leftCol) leftCol.style.display = i === 0 ? 'flex' : 'none';
+            if (coverImg) coverImg.style.display = i === 0 ? 'flex' : 'none';
             if (contentBlock) contentBlock.innerHTML = fullArticlePages[i];
             if (editorBox) editorBox.style.display = i === fullArticlePages.length - 1 ? 'block' : 'none';
             if (pageNumFooter) pageNumFooter.textContent = `Sayfa ${i + 1} / ${fullArticlePages.length}`;
@@ -996,6 +1005,7 @@
         } finally {
           // Restore user's current preview state
           if (leftCol) leftCol.style.display = originalPageIdx === 0 ? 'flex' : 'none';
+          if (coverImg) coverImg.style.display = originalPageIdx === 0 ? 'flex' : 'none';
           if (contentBlock) contentBlock.innerHTML = fullArticlePages[originalPageIdx];
           if (editorBox) editorBox.style.display = originalPageIdx === fullArticlePages.length - 1 ? 'block' : 'none';
           if (pageNumFooter) pageNumFooter.textContent = `Sayfa ${originalPageIdx + 1} / ${fullArticlePages.length}`;
@@ -1038,6 +1048,7 @@
           if (activeTemplate === 'Full' && fullArticlePages.length > 0) {
             // Multi-page Full template
             const leftCol = document.getElementById('fullCardLeftCol');
+            const coverImg = document.getElementById('fullCardCoverImage');
             const contentBlock = document.getElementById('fullCardContent');
             const editorBox = document.getElementById('fullCardEditorAnalysis');
             const pageNumFooter = document.getElementById('fullCardPageNumber');
@@ -1047,6 +1058,7 @@
             for (let i = 0; i < fullArticlePages.length; i++) {
               // Set page content (same logic as image download)
               if (leftCol) leftCol.style.display = i === 0 ? 'flex' : 'none';
+              if (coverImg) coverImg.style.display = i === 0 ? 'flex' : 'none';
               if (contentBlock) contentBlock.innerHTML = fullArticlePages[i];
               if (editorBox) editorBox.style.display = i === fullArticlePages.length - 1 ? 'block' : 'none';
               if (pageNumFooter) pageNumFooter.textContent = `Sayfa ${i + 1} / ${fullArticlePages.length}`;
@@ -1075,6 +1087,7 @@
 
             // Restore preview to original page
             if (leftCol) leftCol.style.display = originalPageIdx === 0 ? 'flex' : 'none';
+            if (coverImg) coverImg.style.display = originalPageIdx === 0 ? 'flex' : 'none';
             if (contentBlock) contentBlock.innerHTML = fullArticlePages[originalPageIdx];
             if (editorBox) editorBox.style.display = originalPageIdx === fullArticlePages.length - 1 ? 'block' : 'none';
             if (pageNumFooter) pageNumFooter.textContent = `Sayfa ${originalPageIdx + 1} / ${fullArticlePages.length}`;
