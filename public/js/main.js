@@ -8,39 +8,9 @@
   /* --- Subscribe Form AJAX --- */
   var subscribeForm = document.getElementById('subscribeForm');
   if (subscribeForm) {
-    subscribeForm.addEventListener('submit', async function (e) {
+    subscribeForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      var emailInput = this.querySelector('input[name="email"]');
-      var email = emailInput.value.trim();
-      var submitBtn = this.querySelector('button[type="submit"]');
-
-      if (!email) return;
-
-      var originalText = submitBtn.textContent;
-      submitBtn.textContent = 'GÖNDERİLİYOR...';
-      submitBtn.disabled = true;
-
-      try {
-        var res = await fetch('/api/subscribe', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: email }),
-        });
-
-        var data = await res.json();
-
-        if (res.ok) {
-          showToast('Başarıyla abone oldunuz! 🎉', 'success');
-          emailInput.value = '';
-        } else {
-          showToast(data.error || 'Bir hata oluştu.', 'error');
-        }
-      } catch (err) {
-        showToast('Bağlantı hatası. Lütfen tekrar deneyin.', 'error');
-      } finally {
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-      }
+      window.location.href = 'http://europolitika.org/';
     });
   }
 

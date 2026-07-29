@@ -56,7 +56,7 @@
     return str.substring(0, len).trim() + '...';
   }
 
-  var relatedArticles = typeof recentArticles !== 'undefined' ? recentArticles : [];
+  var relatedArticles = (typeof recentArticles !== 'undefined' ? recentArticles : []).filter(a => a.id !== article.id);
 
   function getLogoLight(height) {
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 70.21" fill-rule="evenodd" clip-rule="evenodd" style="height: ${height}px; width: auto; display: inline-block; vertical-align: middle;">
@@ -297,7 +297,7 @@
     <h3 style="font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 800; line-height: 1.3; margin-bottom: 12px; color: #FFFFFF;">Küresel & Bölgesel Politik Ekonomi AI Analiz Sistemi</h3>
     <p style="color: #A0AEC0; font-size: 14px; line-height: 1.6; margin-bottom: 20px;">Ortadoğu jeopolitiği ve küresel piyasa verilerini saniyeler içinde işleyip yatırımcılara özel yorumlar ve tahminler sunan arka plan yapay zeka analiz motorumuzla tanışın.</p>
     <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
-      <a href="#subscribe" style="background-color: #C53030; color: #FFFFFF; padding: 12px 24px; font-size: 13px; font-weight: 700; border-radius: 6px; text-transform: uppercase; letter-spacing: 1px; transition: background 0.2s; display: inline-block;">Hemen Abone Olun</a>
+      <a href="http://europolitika.org/" style="background-color: #C53030; color: #FFFFFF; padding: 12px 24px; font-size: 13px; font-weight: 700; border-radius: 6px; text-transform: uppercase; letter-spacing: 1px; transition: background 0.2s; display: inline-block;">Hemen Abone Olun</a>
       <span style="font-size: 12px; color: #718096; font-style: italic;">Powered by EuroPolitika AI Motoru</span>
     </div>
   </div>
@@ -328,10 +328,10 @@
 
   <!-- Right Column: Recommended Articles -->
   <aside class="article-sidebar-right">
-    <div class="sidebar-widget">
-      <h3>ÖNERİLEN ANALİZLER</h3>
-      <div class="recommended-list">
-        <% if (relatedArticles && relatedArticles.length > 0) { %>
+    <% if (relatedArticles && relatedArticles.length > 0) { %>
+      <div class="sidebar-widget">
+        <h3>ÖNERİLEN ANALİZLER</h3>
+        <div class="recommended-list">
           <% relatedArticles.forEach(function(rel) { %>
             <a href="/haber/<%= rel.slug %>" class="rec-card">
               <% if (rel.cover_image) { %>
@@ -343,22 +343,9 @@
               <div class="rec-meta"><%= formatDate(rel.published_at || rel.created_at) %></div>
             </a>
           <% }); %>
-        <% } %>
-        <!-- Mock placeholder cards to make layout look rich and full -->
-        <% if (!relatedArticles || relatedArticles.length < 3) { %>
-          <div class="rec-card">
-            <div class="placeholder-img" style="background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);"></div>
-            <div class="rec-title">Avrupa Birliği Dijital Euro Yarışında Son Virajda</div>
-            <div class="rec-meta">Piyasalar · 3 dk okuma</div>
-          </div>
-          <div class="rec-card">
-            <div class="placeholder-img" style="background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);"></div>
-            <div class="rec-title">Enflasyon Rakamları Sonrası Borsa ve Kur Beklentileri</div>
-            <div class="rec-meta">Makroekonomi · 5 dk okuma</div>
-          </div>
-        <% } %>
+        </div>
       </div>
-    </div>
+    <% } %>
   </aside>
 
 </div>
