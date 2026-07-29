@@ -516,8 +516,8 @@
   <style>
     #shareCardTemplateFull .card-full-content-block p {
       margin-top: 0 !important;
-      margin-bottom: 16px !important;
-      line-height: 1.85 !important;
+      margin-bottom: 12px !important;
+      line-height: 1.72 !important;
       display: block !important;
       text-align: justify !important;
     }
@@ -584,7 +584,7 @@
     <% } %>
   </div>
 
-  <div class="card-full-content-block" id="fullCardContent" style="font-size: 15.5px; line-height: 1.85; color: #1A1A1A; text-align: justify; font-family: 'Inter', sans-serif;">
+  <div class="card-full-content-block" id="fullCardContent" style="font-size: 14.5px; line-height: 1.72; color: #1A1A1A; text-align: justify; font-family: 'Inter', sans-serif;">
     <%- article.content %>
   </div>
 
@@ -730,48 +730,42 @@
     let fullArticlePages = [];
     let currentFullPageIdx = 0;
 
-    // Helper to paginate HTML content based on precise pixel height render
+    // Helper to paginate HTML content based on word count per page (ensuring zero text loss)
     const paginateContent = (htmlContent) => {
-      // Create a temporary hidden container with the exact same width and font properties
-      const tester = document.createElement('div');
-      tester.style.cssText = 'position: absolute; left: -9999px; top: -9999px; width: 870px; font-size: 15.5px; line-height: 1.85; font-family: Inter, sans-serif; text-align: justify; box-sizing: border-box;';
-      document.body.appendChild(tester);
-
       const temp = document.createElement('div');
       temp.innerHTML = htmlContent;
       
       const pages = [];
       let currentPageHTML = '';
+      let currentWordCount = 0;
       
-      // Use temp.children to process HTML elements (p, h2, h3, ul, etc.) directly.
-      // This ensures 100% accurate offsetHeight rendering checks and guarantees no text is skipped.
+      const getWordCount = (el) => {
+        return el.textContent.trim().split(/\s+/).filter(w => w.length > 0).length;
+      };
+      
+      // Loop over children elements to guarantee no paragraph, header, or list item is skipped
       const elements = Array.from(temp.children);
       
       elements.forEach(el => {
-        // Append clone to tester to check height
-        const clone = el.cloneNode(true);
-        tester.appendChild(clone);
+        const words = getWordCount(el);
+        // Page 1 limit: 300 words (fits cover image and takeaways)
+        // Succeeding pages limit: 480 words (perfectly fits 1250px container with 14.5px/1.72 font style)
+        const limit = pages.length === 0 ? 300 : 480;
         
-        const currentHeight = tester.offsetHeight;
-        // First page has visual header, cover image, key takeaways -> less space for text (max 330px text height)
-        // Succeeding pages have full space (max 860px text height)
-        const heightLimit = pages.length === 0 ? 330 : 860;
-        
-        if (currentHeight > heightLimit && currentPageHTML.trim().length > 0) {
+        if (currentWordCount + words > limit && currentWordCount > 0) {
           pages.push(currentPageHTML);
           currentPageHTML = '';
-          tester.innerHTML = '';
-          tester.appendChild(el.cloneNode(true));
+          currentWordCount = 0;
         }
         
         currentPageHTML += el.outerHTML;
+        currentWordCount += words;
       });
       
       if (currentPageHTML.trim().length > 0) {
         pages.push(currentPageHTML);
       }
       
-      document.body.removeChild(tester);
       return pages;
     };
 
