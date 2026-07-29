@@ -858,98 +858,53 @@
       }
     });
 
-    // Bind standalone PDF download action (outside modal, uses article content directly)
+    // Bind standalone PDF download — renders the VISIBLE article element directly
     const btnDownloadPDFMain = document.getElementById('btnDownloadPDFMain');
     if (btnDownloadPDFMain) {
       btnDownloadPDFMain.addEventListener('click', () => {
-        // Create a full-screen overlay to hide rendering
-        const overlay = document.createElement('div');
-        overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 999998; display: flex; align-items: center; justify-content: center; font-family: Inter, sans-serif;';
-        overlay.innerHTML = '<div style="background: #fff; padding: 32px 48px; border-radius: 12px; text-align: center;"><div style="font-size: 28px; margin-bottom: 12px;">⏳</div><div style="font-size: 16px; font-weight: 600; color: #1A1A1A;">PDF Hazırlanıyor...</div><div style="font-size: 13px; color: #718096; margin-top: 8px;">Lütfen bekleyin</div></div>';
-        document.body.appendChild(overlay);
-        
-        // Build a clean, styled container ON-SCREEN (html2canvas cannot render off-screen elements)
-        const pdfContainer = document.createElement('div');
-        pdfContainer.style.cssText = 'position: fixed; top: 0; left: 0; width: 800px; background: #FFFFFF; padding: 40px 48px; font-family: Inter, sans-serif; color: #1A1A1A; box-sizing: border-box; z-index: 999999; overflow: auto; max-height: 100vh;';
-        
-        // Header with logo and category
-        let headerHTML = '<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #C53030; padding-bottom: 16px; margin-bottom: 24px;">';
-        headerHTML += '<div style="font-family: Playfair Display, serif; font-size: 22px; font-weight: 800; color: #C53030;">EuroPolitika</div>';
-        headerHTML += '<div style="font-size: 11px; color: #718096;"><%= article.category ? article.category : "Analiz" %> · <%= formatDate(article.published_at || article.created_at) %></div>';
-        headerHTML += '</div>';
-        
-        // Title
-        headerHTML += '<h1 style="font-family: Playfair Display, serif; font-size: 26px; font-weight: 800; line-height: 1.3; color: #1A1A1A; margin: 0 0 20px 0;"><%= article.title %></h1>';
-        
-        // Key Takeaways
-        <% if (article.key_takeaways) { %>
-        headerHTML += '<div style="background: #F7FAFC; border-left: 4px solid #3182CE; padding: 16px 20px; border-radius: 4px; margin-bottom: 24px;">';
-        headerHTML += '<div style="font-size: 11px; font-weight: 700; color: #3182CE; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px;">💡 Öne Çıkanlar</div>';
-        headerHTML += '<ul style="margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.6; color: #2D3748;">';
-        '<%= article.key_takeaways %>'.split('\n').map(l => l.trim()).filter(l => l.length > 2).forEach(b => {
-          headerHTML += '<li style="margin-bottom: 4px;">' + b + '</li>';
+        const articleEl = document.querySelector('.article-detail');
+        if (!articleEl) return;
+
+        // Elements to hide during PDF capture
+        const hideSelectors = ['.share-section', '.newsletter-cta-banner'];
+        const hidden = [];
+        hideSelectors.forEach(sel => {
+          const el = articleEl.querySelector(sel);
+          if (el) {
+            hidden.push({ el, prev: el.style.display });
+            el.style.display = 'none';
+          }
         });
-        headerHTML += '</ul></div>';
-        <% } %>
-        
-        pdfContainer.innerHTML = headerHTML;
-        
-        // Clone article content
-        const contentClone = document.querySelector('.article-content').cloneNode(true);
-        contentClone.style.cssText = 'font-size: 14px; line-height: 1.75; color: #1A1A1A; text-align: justify;';
-        pdfContainer.appendChild(contentClone);
-        
-        // Editor analysis
-        <% if (article.editor_analysis) { %>
-        const editorBox = document.createElement('div');
-        editorBox.style.cssText = 'margin-top: 24px; padding: 20px; background: #FFF5F5; border-left: 4px solid #C53030; border-radius: 4px;';
-        editorBox.innerHTML = '<div style="font-weight: 800; font-size: 14px; color: #1A1A1A; margin-bottom: 10px;">⭐ Editör Özel Analizi & Yorumu</div>' +
-          '<div style="font-size: 13px; line-height: 1.65; color: #2D3748; white-space: pre-wrap;"><%= article.editor_analysis.replace(/'/g, "\\'").replace(/\n/g, "\\n") %></div>';
-        pdfContainer.appendChild(editorBox);
-        <% } %>
-        
-        // Footer
-        const footerEl = document.createElement('div');
-        footerEl.style.cssText = 'margin-top: 30px; padding-top: 16px; border-top: 1px solid #E2E8F0; display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #A0AEC0;';
-        footerEl.innerHTML = '<span>© EuroPolitika · europolitika.org</span><span>AI Destekli Analiz Sistemi</span>';
-        pdfContainer.appendChild(footerEl);
-        
-        document.body.appendChild(pdfContainer);
-        
+
         btnDownloadPDFMain.disabled = true;
         const originalHTML = btnDownloadPDFMain.innerHTML;
         btnDownloadPDFMain.innerHTML = '<span>⏳ PDF Hazırlanıyor...</span>';
-        
-        // Small delay to ensure DOM has rendered the on-screen element
-        setTimeout(() => {
-          const opt = {
-            margin: [10, 10, 10, 10],
-            filename: '<%= article.slug %>.pdf',
-            image: { type: 'jpeg', quality: 0.95 },
-            html2canvas: { scale: 2, useCORS: true, allowTaint: true, scrollX: 0, scrollY: 0, windowWidth: 800 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-          };
-          
-          html2pdf().from(pdfContainer).set(opt).save().then(() => {
-            document.body.removeChild(pdfContainer);
-            document.body.removeChild(overlay);
-            btnDownloadPDFMain.disabled = false;
-            btnDownloadPDFMain.innerHTML = originalHTML;
-            if (window.showToast) {
-              window.showToast('PDF başarıyla indirildi! 📄', 'success');
-            }
-          }).catch(err => {
-            console.error('PDF Generation Error:', err);
-            if (pdfContainer.parentNode) document.body.removeChild(pdfContainer);
-            if (overlay.parentNode) document.body.removeChild(overlay);
-            btnDownloadPDFMain.disabled = false;
-            btnDownloadPDFMain.innerHTML = originalHTML;
-            if (window.showToast) {
-              window.showToast('PDF oluşturulurken bir hata oluştu.', 'error');
-            }
-          });
-        }, 300);
+
+        const opt = {
+          margin: [8, 8, 8, 8],
+          filename: '<%= article.slug %>.pdf',
+          image: { type: 'jpeg', quality: 0.95 },
+          html2canvas: { scale: 2, useCORS: true, allowTaint: true, scrollY: -window.scrollY },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+
+        html2pdf().from(articleEl).set(opt).save().then(() => {
+          hidden.forEach(h => h.el.style.display = h.prev);
+          btnDownloadPDFMain.disabled = false;
+          btnDownloadPDFMain.innerHTML = originalHTML;
+          if (window.showToast) {
+            window.showToast('PDF başarıyla indirildi! 📄', 'success');
+          }
+        }).catch(err => {
+          console.error('PDF Generation Error:', err);
+          hidden.forEach(h => h.el.style.display = h.prev);
+          btnDownloadPDFMain.disabled = false;
+          btnDownloadPDFMain.innerHTML = originalHTML;
+          if (window.showToast) {
+            window.showToast('PDF oluşturulurken bir hata oluştu.', 'error');
+          }
+        });
       });
     }
 
