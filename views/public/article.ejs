@@ -730,18 +730,18 @@
     let fullArticlePages = [];
     let currentFullPageIdx = 0;
 
-    // Helper to paginate HTML content based on word count
+    // Helper to paginate HTML content based on precise pixel height render
     const paginateContent = (htmlContent) => {
+      // Create a temporary hidden container with the exact same width and font properties
+      const tester = document.createElement('div');
+      tester.style.cssText = 'position: absolute; left: -9999px; top: -9999px; width: 870px; font-size: 15.5px; line-height: 1.85; font-family: Inter, sans-serif; text-align: justify; box-sizing: border-box;';
+      document.body.appendChild(tester);
+
       const temp = document.createElement('div');
       temp.innerHTML = htmlContent;
       
       const pages = [];
       let currentPageHTML = '';
-      let currentWordCount = 0;
-      
-      const getWordCount = (el) => {
-        return el.textContent.trim().split(/\s+/).filter(w => w.length > 0).length;
-      };
       
       Array.from(temp.childNodes).forEach(node => {
         if (node.nodeType === Node.TEXT_NODE && !node.textContent.trim()) {
@@ -749,25 +749,33 @@
           return;
         }
         
-        const words = getWordCount(node);
-        const limit = pages.length === 0 ? 260 : 470;
+        // Append this node to tester to check vertical height
+        const clone = node.cloneNode(true);
+        tester.appendChild(clone);
         
-        if (currentWordCount + words > limit && currentWordCount > 0) {
+        const currentHeight = tester.offsetHeight;
+        // First page has visual header, cover image, key takeaways -> less space for text (max 330px text height)
+        // Succeeding pages have full space (max 860px text height)
+        const heightLimit = pages.length === 0 ? 330 : 860;
+        
+        if (currentHeight > heightLimit && currentPageHTML.length > 0) {
           pages.push(currentPageHTML);
           currentPageHTML = '';
-          currentWordCount = 0;
+          tester.innerHTML = '';
+          // Re-append to tester for the new page height tracking
+          tester.appendChild(node.cloneNode(true));
         }
         
         const container = document.createElement('div');
         container.appendChild(node.cloneNode(true));
         currentPageHTML += container.innerHTML;
-        currentWordCount += words;
       });
       
       if (currentPageHTML.trim().length > 0) {
         pages.push(currentPageHTML);
       }
       
+      document.body.removeChild(tester);
       return pages;
     };
 
