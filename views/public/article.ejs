@@ -512,18 +512,18 @@
 </div>
 
 <!-- Hidden container for generating shareable image card (Full Article Screenshot style) -->
-<div id="shareCardTemplateFull" style="position: absolute; left: -9999px; top: -9999px; width: 600px; background-color: #F8F7F4; padding: 45px; box-sizing: border-box; border: 4px solid #C53030; border-radius: 12px; font-family: 'Inter', sans-serif;">
+<div id="shareCardTemplateFull" style="position: absolute; left: -9999px; top: -9999px; width: 960px; background-color: #F8F7F4; padding: 45px; box-sizing: border-box; border: 4px solid #C53030; border-radius: 12px; font-family: 'Inter', sans-serif;">
   <style>
     #shareCardTemplateFull .card-full-content-block p {
       margin-top: 0 !important;
       margin-bottom: 12px !important;
-      line-height: 1.8 !important;
+      line-height: 1.75 !important;
       display: block !important;
       text-align: justify !important;
     }
     #shareCardTemplateFull .card-full-content-block h2,
     #shareCardTemplateFull .card-full-content-block h3 {
-      margin-top: 24px !important;
+      margin-top: 20px !important;
       margin-bottom: 12px !important;
       font-family: 'Playfair Display', serif !important;
       font-weight: 700 !important;
@@ -534,9 +534,9 @@
       display: block !important;
       max-width: 100% !important;
       height: auto !important;
-      margin: 20px 0 !important;
-      padding-top: 20px !important;
-      padding-bottom: 20px !important;
+      margin: 15px 0 !important;
+      padding-top: 10px !important;
+      padding-bottom: 10px !important;
       box-sizing: border-box !important;
     }
     #shareCardTemplateFull .card-full-content-block img.image-placeholder {
@@ -552,54 +552,59 @@
     <%- getLogoLight(40) %>
     <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: #718096; margin-top: 6px; font-weight: 700;">Haftalık Politik Ekonomi Bülteni</div>
   </div>
-  
-  <% if (hasEditorAnalysis) { %>
-    <div style="display: inline-flex; align-items: center; background-color: #C53030; color: #FFFFFF; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif; line-height: 1;"><span style="margin-right: 4px; font-size: 11px; line-height: 1;">⭐</span> ÖZEL EDİTÖR ANALİZİ</div>
-  <% } else if (article.category) { %>
-    <div style="font-size: 12px; font-weight: 700; color: #C53030; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;"><%= article.category %></div>
-  <% } %>
-  
-  <h1 style="font-family: 'Playfair Display', serif; font-size: 26px; line-height: 1.35; color: #1A1A1A; margin-bottom: 25px; font-weight: 800;"><%= article.title %></h1>
-  
-  <% if (article.cover_image) { %>
-    <div style="width: 100%; height: 300px; border-radius: 8px; overflow: hidden; margin-bottom: 30px; border: 1px solid #E8E4DE;">
-      <img src="<%= article.cover_image %>" style="width: 100%; height: 100%; object-fit: cover;" crossorigin="anonymous">
-    </div>
-  <% } %>
 
-  <!-- Key Takeaways inside Full Card -->
-  <% if (article.key_takeaways) { %>
-    <div style="background-color: #F8F7F4; border: 1px solid #E8E4DE; border-left: 5px solid #3182CE; border-radius: 8px; padding: 18px 20px; margin-bottom: 30px; font-family: 'Inter', sans-serif;">
-      <div style="font-size: 11px; font-weight: 800; color: #3182CE; text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
-        <span>💡</span> <span>3 Maddede Öne Çıkanlar</span>
+  <div style="display: flex; gap: 40px; margin-bottom: 30px; align-items: flex-start;">
+    <!-- Left Column: Title, Category, Cover Image, Key Takeaways, CTA Banner -->
+    <div style="width: 380px; flex-shrink: 0; display: flex; flex-direction: column;">
+      <% if (hasEditorAnalysis) { %>
+        <div style="display: inline-flex; align-items: center; background-color: #C53030; color: #FFFFFF; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif; line-height: 1; align-self: flex-start;"><span style="margin-right: 4px; font-size: 11px; line-height: 1;">⭐</span> ÖZEL EDİTÖR ANALİZİ</div>
+      <% } else if (article.category) { %>
+        <div style="font-size: 12px; font-weight: 700; color: #C53030; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;"><%= article.category %></div>
+      <% } %>
+      
+      <h1 style="font-family: 'Playfair Display', serif; font-size: 24px; line-height: 1.35; color: #1A1A1A; margin-top: 0; margin-bottom: 20px; font-weight: 800;"><%= article.title %></h1>
+      
+      <% if (article.cover_image) { %>
+        <div style="width: 100%; height: 220px; border-radius: 8px; overflow: hidden; margin-bottom: 20px; border: 1px solid #E8E4DE;">
+          <img src="<%= article.cover_image %>" style="width: 100%; height: 100%; object-fit: cover;" crossorigin="anonymous">
+        </div>
+      <% } %>
+
+      <% if (article.key_takeaways) { %>
+        <div style="background-color: #F8F7F4; border: 1px solid #E8E4DE; border-left: 5px solid #3182CE; border-radius: 8px; padding: 16px; margin-bottom: 20px; font-family: 'Inter', sans-serif;">
+          <div style="font-size: 11px; font-weight: 800; color: #3182CE; text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+            <span>💡</span> <span>3 Maddede Öne Çıkanlar</span>
+          </div>
+          <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; color: #2D3748; font-size: 13px; line-height: 1.4; font-weight: 500;">
+            <% article.key_takeaways.split('\n').map(l => l.trim()).filter(l => l.length > 2).forEach(function(bullet) { %>
+              <li><%= bullet %></li>
+            <% }); %>
+          </ul>
+        </div>
+      <% } %>
+
+      <div style="background-color: #1A1A1A; color: #FFFFFF; padding: 20px; border-radius: 12px; border: 1px solid #C53030; font-family: 'Inter', sans-serif; text-align: center;">
+        <div style="font-size: 9px; font-weight: 800; color: #C53030; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">EuroPolitika AI Bülten</div>
+        <div style="font-size: 13px; font-weight: 700; color: #FFFFFF; line-height: 1.4; margin-bottom: 4px;">Yapay Zeka Destekli Ortadoğu & Küresel Ekonomi Analizleri</div>
+        <div style="font-size: 10px; color: #A0AEC0;">Hemen üye olun, gelişmeler e-postanıza gelsin!</div>
       </div>
-      <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; color: #2D3748; font-size: 13.5px; line-height: 1.5; font-weight: 500;">
-        <% article.key_takeaways.split('\n').map(l => l.trim()).filter(l => l.length > 2).forEach(function(bullet) { %>
-          <li><%= bullet %></li>
-        <% }); %>
-      </ul>
     </div>
-  <% } %>
-  
-  <!-- Render the entire HTML content with original style inside card -->
-  <div class="card-full-content-block" style="font-size: 15px; line-height: 1.8; color: #1A1A1A; text-align: justify; font-family: 'Inter', sans-serif;">
-    <%- article.content %>
-  </div>
 
-  <% if (article.editor_analysis) { %>
-    <div class="card-editor-analysis" style="margin-top: 30px; padding: 24px; background-color: #FFF5F5; border-left: 4px solid #C53030; border-radius: 4px; font-family: 'Inter', sans-serif; text-align: left; box-sizing: border-box;">
-      <div style="font-weight: 800; font-family: 'Playfair Display', serif; font-size: 16px; color: #1A1A1A; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-        <span>⭐</span> <span>Editör Özel Analizi & Yorumu</span>
+    <!-- Right Column: Content & Commentary -->
+    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
+      <div class="card-full-content-block" style="font-size: 14.5px; line-height: 1.75; color: #1A1A1A; text-align: justify; font-family: 'Inter', sans-serif;">
+        <%- article.content %>
       </div>
-      <div style="font-size: 14px; line-height: 1.65; color: #2D3748; white-space: pre-wrap;"><%= article.editor_analysis %></div>
-    </div>
-  <% } %>
 
-  <!-- Dynamic Advertisement/AI System Promo CTA inside Full Card -->
-  <div style="background-color: #1A1A1A; color: #FFFFFF; padding: 24px; border-radius: 12px; margin-top: 40px; margin-bottom: 25px; text-align: center; border: 1px solid #C53030; font-family: 'Inter', sans-serif;">
-    <div style="font-size: 10px; font-weight: 800; color: #C53030; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px;">EuroPolitika AI Bülten</div>
-    <div style="font-size: 14px; font-weight: 700; color: #FFFFFF; line-height: 1.4; margin-bottom: 6px;">Yapay Zeka Destekli Ortadoğu & Küresel Ekonomi Analizleri</div>
-    <div style="font-size: 11px; color: #A0AEC0;">Hemen üye olun, gelişmeler e-postanıza gelsin!</div>
+      <% if (article.editor_analysis) { %>
+        <div class="card-editor-analysis" style="margin-top: 20px; padding: 20px; background-color: #FFF5F5; border-left: 4px solid #C53030; border-radius: 4px; font-family: 'Inter', sans-serif; text-align: left; box-sizing: border-box;">
+          <div style="font-weight: 800; font-family: 'Playfair Display', serif; font-size: 15px; color: #1A1A1A; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+            <span>⭐</span> <span>Editör Özel Analizi & Yorumu</span>
+          </div>
+          <div style="font-size: 13.5px; line-height: 1.6; color: #2D3748; white-space: pre-wrap;"><%= article.editor_analysis %></div>
+        </div>
+      <% } %>
+    </div>
   </div>
   
   <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E8E4DE; padding-top: 20px;">
@@ -627,11 +632,14 @@
       <!-- Dynamic generated img will be placed here -->
     </div>
     
-    <div style="display: flex; gap: 12px; width: 100%; font-family: 'Inter', sans-serif;">
-      <button id="btnDownloadPreview" style="flex: 1; padding: 12px 20px; background: #C53030; color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s;">
-        📥 Cihaza İndir
+    <div style="display: flex; gap: 8px; width: 100%; font-family: 'Inter', sans-serif;">
+      <button id="btnDownloadPreview" style="flex: 1; padding: 10px 14px; background: #C53030; color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s;">
+        📥 Görsel İndir
       </button>
-      <button id="btnClosePreview" style="padding: 12px 20px; background: #E2E8F0; color: #4A5568; border: none; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; transition: background 0.2s;">
+      <button id="btnDownloadPDF" style="flex: 1; padding: 10px 14px; background: #2B6CB0; color: #fff; border: none; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: background 0.2s;">
+        📄 PDF İndir
+      </button>
+      <button id="btnClosePreview" style="padding: 10px 14px; background: #E2E8F0; color: #4A5568; border: none; border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; transition: background 0.2s;">
         Kapat
       </button>
     </div>
@@ -639,6 +647,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     // Automatically detect if this is a newsletter digest (Bülten)
@@ -844,8 +853,46 @@
       document.body.removeChild(link);
       
       if (window.showToast) {
-        window.showToast('Görsel kartı başarıyla indirildi!', 'success');
+        window.showToast('Görsel kartı başarıyla indirildi! 📷', 'success');
       }
+    });
+
+    // Bind PDF download action
+    const btnDownloadPDF = document.getElementById('btnDownloadPDF');
+    btnDownloadPDF.addEventListener('click', () => {
+      let targetId = 'shareCardTemplate';
+      if (activeTemplate === 'Dark') targetId = 'shareCardTemplateDark';
+      if (activeTemplate === 'Quote') targetId = 'shareCardTemplateQuote';
+      if (activeTemplate === 'Tall') targetId = 'shareCardTemplateTall';
+      if (activeTemplate === 'Full') targetId = 'shareCardTemplateFull';
+      
+      const shareCard = document.getElementById(targetId);
+      
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: '<%= article.slug %>.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, allowTaint: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      };
+      
+      btnDownloadPDF.disabled = true;
+      const originalText = btnDownloadPDF.innerHTML;
+      btnDownloadPDF.innerHTML = '⏳ Hazırlanıyor...';
+      
+      html2pdf().from(shareCard).set(opt).save().then(() => {
+        btnDownloadPDF.disabled = false;
+        btnDownloadPDF.innerHTML = originalText;
+        if (window.showToast) {
+          window.showToast('PDF başarıyla indirildi! 📄', 'success');
+        }
+      }).catch(err => {
+        console.error('PDF Generation Error:', err);
+        btnDownloadPDF.disabled = false;
+        btnDownloadPDF.innerHTML = originalText;
+        alert('PDF oluşturulurken bir hata oluştu.');
+      });
     });
 
     // Fetch live market data from backend Yahoo Finance proxy
