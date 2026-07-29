@@ -553,59 +553,47 @@
     <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: #718096; margin-top: 6px; font-weight: 700;">Haftalık Politik Ekonomi Bülteni</div>
   </div>
 
-  <div style="display: flex; gap: 40px; margin-bottom: 30px; align-items: flex-start;">
-    <!-- Left Column: Title, Category, Cover Image, Key Takeaways, CTA Banner -->
-    <div id="fullCardLeftCol" style="width: 380px; flex-shrink: 0; display: flex; flex-direction: column;">
-      <% if (hasEditorAnalysis) { %>
-        <div style="display: inline-flex; align-items: center; background-color: #C53030; color: #FFFFFF; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif; line-height: 1; align-self: flex-start;"><span style="margin-right: 4px; font-size: 11px; line-height: 1;">⭐</span> ÖZEL EDİTÖR ANALİZİ</div>
-      <% } else if (article.category) { %>
-        <div style="font-size: 12px; font-weight: 700; color: #C53030; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;"><%= article.category %></div>
-      <% } %>
-      
-      <h1 style="font-family: 'Playfair Display', serif; font-size: 24px; line-height: 1.35; color: #1A1A1A; margin-top: 0; margin-bottom: 20px; font-weight: 800;"><%= article.title %></h1>
-      
-      <% if (article.cover_image) { %>
-        <div style="width: 100%; height: 220px; border-radius: 8px; overflow: hidden; margin-bottom: 20px; border: 1px solid #E8E4DE;">
-          <img src="<%= article.cover_image %>" style="width: 100%; height: 100%; object-fit: cover;" crossorigin="anonymous">
-        </div>
-      <% } %>
-
-      <% if (article.key_takeaways) { %>
-        <div style="background-color: #F8F7F4; border: 1px solid #E8E4DE; border-left: 5px solid #3182CE; border-radius: 8px; padding: 16px; margin-bottom: 20px; font-family: 'Inter', sans-serif;">
-          <div style="font-size: 11px; font-weight: 800; color: #3182CE; text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-            <span>💡</span> <span>3 Maddede Öne Çıkanlar</span>
-          </div>
-          <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; color: #2D3748; font-size: 13px; line-height: 1.4; font-weight: 500;">
-            <% article.key_takeaways.split('\n').map(l => l.trim()).filter(l => l.length > 2).forEach(function(bullet) { %>
-              <li><%= bullet %></li>
-            <% }); %>
-          </ul>
-        </div>
-      <% } %>
-
-      <div style="background-color: #1A1A1A; color: #FFFFFF; padding: 20px; border-radius: 12px; border: 1px solid #C53030; font-family: 'Inter', sans-serif; text-align: center;">
-        <div style="font-size: 9px; font-weight: 800; color: #C53030; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;">EuroPolitika AI Bülten</div>
-        <div style="font-size: 13px; font-weight: 700; color: #FFFFFF; line-height: 1.4; margin-bottom: 4px;">Yapay Zeka Destekli Ortadoğu & Küresel Ekonomi Analizleri</div>
-        <div style="font-size: 10px; color: #A0AEC0;">Hemen üye olun, gelişmeler e-postanıza gelsin!</div>
-      </div>
+  <% if (article.cover_image) { %>
+    <div style="width: 100%; height: 280px; border-radius: 8px; overflow: hidden; margin-bottom: 24px; border: 1px solid #E8E4DE;">
+      <img src="<%= article.cover_image %>" style="width: 100%; height: 100%; object-fit: cover;" crossorigin="anonymous">
     </div>
+  <% } %>
 
-    <!-- Right Column: Content & Commentary -->
-    <div style="flex: 1; min-width: 0; display: flex; flex-direction: column;">
-      <div class="card-full-content-block" id="fullCardContent" style="font-size: 14.5px; line-height: 1.75; color: #1A1A1A; text-align: justify; font-family: 'Inter', sans-serif;">
-        <%- article.content %>
-      </div>
+  <div id="fullCardLeftCol" style="display: flex; flex-direction: column; margin-bottom: 24px;">
+    <% if (hasEditorAnalysis) { %>
+      <div style="display: inline-flex; align-items: center; background-color: #C53030; color: #FFFFFF; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif; line-height: 1; align-self: flex-start;"><span style="margin-right: 4px; font-size: 11px; line-height: 1;">⭐</span> ÖZEL EDİTÖR ANALİZİ</div>
+    <% } else if (article.category) { %>
+      <div style="font-size: 12px; font-weight: 700; color: #C53030; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;"><%= article.category %></div>
+    <% } %>
+    
+    <h1 style="font-family: 'Playfair Display', serif; font-size: 24px; line-height: 1.35; color: #1A1A1A; margin-top: 0; margin-bottom: 16px; font-weight: 800;"><%= article.title %></h1>
 
-      <% if (article.editor_analysis) { %>
-        <div class="card-editor-analysis" id="fullCardEditorAnalysis" style="margin-top: 20px; padding: 20px; background-color: #FFF5F5; border-left: 4px solid #C53030; border-radius: 4px; font-family: 'Inter', sans-serif; text-align: left; box-sizing: border-box;">
-          <div style="font-weight: 800; font-family: 'Playfair Display', serif; font-size: 15px; color: #1A1A1A; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
-            <span>⭐</span> <span>Editör Özel Analizi & Yorumu</span>
-          </div>
-          <div style="font-size: 13.5px; line-height: 1.6; color: #2D3748; white-space: pre-wrap;"><%= article.editor_analysis %></div>
+    <% if (article.key_takeaways) { %>
+      <div style="background-color: #F8F7F4; border: 1px solid #E8E4DE; border-left: 5px solid #3182CE; border-radius: 8px; padding: 16px; font-family: 'Inter', sans-serif;">
+        <div style="font-size: 11px; font-weight: 800; color: #3182CE; text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+          <span>💡</span> <span>3 Maddede Öne Çıkanlar</span>
         </div>
-      <% } %>
-    </div>
+        <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; color: #2D3748; font-size: 13px; line-height: 1.4; font-weight: 500;">
+          <% article.key_takeaways.split('\n').map(l => l.trim()).filter(l => l.length > 2).forEach(function(bullet) { %>
+            <li><%= bullet %></li>
+          <% }); %>
+        </ul>
+      </div>
+    <% } %>
   </div>
+
+  <div class="card-full-content-block" id="fullCardContent" style="font-size: 14.5px; line-height: 1.75; color: #1A1A1A; text-align: justify; font-family: 'Inter', sans-serif;">
+    <%- article.content %>
+  </div>
+
+  <% if (article.editor_analysis) { %>
+    <div class="card-editor-analysis" id="fullCardEditorAnalysis" style="margin-top: 20px; padding: 20px; background-color: #FFF5F5; border-left: 4px solid #C53030; border-radius: 4px; font-family: 'Inter', sans-serif; text-align: left; box-sizing: border-box;">
+      <div style="font-weight: 800; font-family: 'Playfair Display', serif; font-size: 15px; color: #1A1A1A; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+        <span>⭐</span> <span>Editör Özel Analizi & Yorumu</span>
+      </div>
+      <div style="font-size: 13.5px; line-height: 1.6; color: #2D3748; white-space: pre-wrap;"><%= article.editor_analysis %></div>
+    </div>
+  <% } %>
   
   <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E8E4DE; padding-top: 20px;">
     <div style="font-size: 11px; color: #718096;"><%= formatDate(article.published_at || article.created_at) %></div>
