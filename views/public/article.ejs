@@ -516,8 +516,8 @@
   <style>
     #shareCardTemplateFull .card-full-content-block p {
       margin-top: 0 !important;
-      margin-bottom: 12px !important;
-      line-height: 1.75 !important;
+      margin-bottom: 16px !important;
+      line-height: 1.85 !important;
       display: block !important;
       text-align: justify !important;
     }
@@ -584,7 +584,7 @@
     <% } %>
   </div>
 
-  <div class="card-full-content-block" id="fullCardContent" style="font-size: 14.5px; line-height: 1.75; color: #1A1A1A; text-align: justify; font-family: 'Inter', sans-serif;">
+  <div class="card-full-content-block" id="fullCardContent" style="font-size: 15.5px; line-height: 1.85; color: #1A1A1A; text-align: justify; font-family: 'Inter', sans-serif;">
     <%- article.content %>
   </div>
 
@@ -750,7 +750,7 @@
         }
         
         const words = getWordCount(node);
-        const limit = pages.length === 0 ? 220 : 380;
+        const limit = pages.length === 0 ? 260 : 470;
         
         if (currentWordCount + words > limit && currentWordCount > 0) {
           pages.push(currentPageHTML);
