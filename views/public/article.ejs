@@ -512,23 +512,40 @@
 </div>
 
 <!-- Hidden container for generating shareable image card (Full Article Screenshot style) -->
-<div id="shareCardTemplateFull" style="position: absolute; left: -9999px; top: -9999px; width: 960px; background-color: #F8F7F4; padding: 45px 45px 75px 45px; box-sizing: border-box; border: 4px solid #C53030; border-radius: 12px; font-family: 'Inter', sans-serif; height: 1250px; display: flex; flex-direction: column; justify-content: space-between;">
+<div id="shareCardTemplateFull" style="position: absolute; left: -9999px; top: -9999px; width: 960px; background-color: #F8F7F4; padding: 40px; box-sizing: border-box; border: 4px solid #C53030; border-radius: 12px; font-family: 'Inter', sans-serif; height: 1382px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-start;">
   <style>
+    /* The card has a fixed height, so any direct child left with the default
+       flex-shrink: 1 gets crushed when the page content is tall. Pin them all. */
+    #shareCardTemplateFull > div {
+      flex: 0 0 auto;
+    }
     #shareCardTemplateFull .card-full-content-block p {
       margin-top: 0 !important;
-      margin-bottom: 12px !important;
-      line-height: 1.72 !important;
+      margin-bottom: 13px !important;
+      line-height: 1.65 !important;
       display: block !important;
       text-align: justify !important;
     }
     #shareCardTemplateFull .card-full-content-block h2,
     #shareCardTemplateFull .card-full-content-block h3 {
-      margin-top: 20px !important;
+      margin-top: 22px !important;
       margin-bottom: 12px !important;
       font-family: 'Playfair Display', serif !important;
       font-weight: 700 !important;
       line-height: 1.25 !important;
       display: block !important;
+    }
+    #shareCardTemplateFull .card-full-content-block h2 { font-size: 25px !important; }
+    #shareCardTemplateFull .card-full-content-block h3 { font-size: 21px !important; }
+    #shareCardTemplateFull .card-full-content-block ul,
+    #shareCardTemplateFull .card-full-content-block ol {
+      margin-top: 0 !important;
+      margin-bottom: 13px !important;
+      padding-left: 26px !important;
+    }
+    #shareCardTemplateFull .card-full-content-block li {
+      margin-bottom: 7px !important;
+      line-height: 1.6 !important;
     }
     #shareCardTemplateFull .card-full-content-block img {
       display: block !important;
@@ -552,30 +569,32 @@
     }
   </style>
 
-  <div style="text-align: center; border-bottom: 2px solid #1A1A1A; padding-bottom: 20px; margin-bottom: 25px;">
-    <%- getLogoLight(40) %>
-    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: #718096; margin-top: 6px; font-weight: 700;">Haftalık Politik Ekonomi Bülteni</div>
+  <div id="fullCardHeader" style="text-align: center; border-bottom: 2px solid #1A1A1A; padding-bottom: 18px; margin-bottom: 22px;">
+    <%- getLogoLight(48) %>
+    <div style="font-size: 13px; text-transform: uppercase; letter-spacing: 3px; color: #718096; margin-top: 6px; font-weight: 700;">Haftalık Politik Ekonomi Bülteni</div>
   </div>
 
   <% if (article.cover_image) { %>
-    <div id="fullCardCoverImage" style="width: 100%; height: 260px; display: flex; align-items: center; justify-content: center; background-color: transparent; border-radius: 8px; overflow: hidden; margin-bottom: 24px; border: none; padding: 0; box-sizing: border-box;">
-      <img src="<%= article.cover_image %>" style="max-width: 100%; max-height: 100%; object-fit: contain; display: block;" crossorigin="anonymous">
+    <div id="fullCardCoverImage" style="width: 100%; background-color: transparent; border-radius: 8px; overflow: hidden; margin-bottom: 22px; border: none; padding: 0; box-sizing: border-box; line-height: 0;">
+      <img src="<%= article.cover_image %>" style="width: 100%; height: auto; max-height: 470px; object-fit: cover; object-position: center; display: block;" crossorigin="anonymous">
     </div>
   <% } %>
 
-  <div id="fullCardLeftCol" style="display: flex; flex-direction: column; margin-bottom: 24px;">
+  <div id="fullCardLeftCol" style="display: flex; flex-direction: column; margin-bottom: 22px;">
     <% if (hasEditorAnalysis) { %>
-      <div style="display: inline-flex; align-items: center; background-color: #C53030; color: #FFFFFF; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif; line-height: 1; align-self: flex-start;"><span style="margin-right: 4px; font-size: 11px; line-height: 1;">⭐</span> ANALİZ</div>
+      <!-- line-height 1 makes html2canvas clip the uppercase glyphs, so give the
+           badge real leading instead of relying on padding alone. -->
+      <div style="display: inline-flex; align-items: center; background-color: #C53030; color: #FFFFFF; font-size: 12px; font-weight: 700; padding: 6px 11px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif; line-height: 1.4; align-self: flex-start;"><span style="margin-right: 5px; font-size: 13px; line-height: 1.4;">⭐</span> ANALİZ</div>
     <% } %>
-    
-    <h1 style="font-family: 'Playfair Display', serif; font-size: 24px; line-height: 1.35; color: #1A1A1A; margin-top: 0; margin-bottom: 16px; font-weight: 800;"><%= article.title %></h1>
+
+    <h1 style="font-family: 'Playfair Display', serif; font-size: 31px; line-height: 1.28; color: #1A1A1A; margin-top: 0; margin-bottom: 16px; font-weight: 800;"><%= article.title %></h1>
 
     <% if (article.key_takeaways) { %>
-      <div style="background-color: #F8F7F4; border: 1px solid #E8E4DE; border-left: 5px solid #3182CE; border-radius: 8px; padding: 16px; font-family: 'Inter', sans-serif;">
-        <div style="font-size: 11px; font-weight: 800; color: #3182CE; text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+      <div style="background-color: #F8F7F4; border: 1px solid #E8E4DE; border-left: 5px solid #3182CE; border-radius: 8px; padding: 16px 18px; font-family: 'Inter', sans-serif;">
+        <div style="font-size: 13px; font-weight: 800; color: #3182CE; text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
           <span>💡</span> <span>3 Maddede Öne Çıkanlar</span>
         </div>
-        <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; color: #2D3748; font-size: 13px; line-height: 1.4; font-weight: 500;">
+        <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 7px; color: #2D3748; font-size: 16px; line-height: 1.45; font-weight: 500;">
           <% article.key_takeaways.split('\n').map(l => l.trim()).filter(l => l.length > 2).forEach(function(bullet) { %>
             <li><%= bullet %></li>
           <% }); %>
@@ -584,23 +603,25 @@
     <% } %>
   </div>
 
-  <div class="card-full-content-block" id="fullCardContent" style="font-size: 14.5px; line-height: 1.72; color: #1A1A1A; text-align: justify; font-family: 'Inter', sans-serif;">
+  <div class="card-full-content-block" id="fullCardContent" style="font-size: 18px; line-height: 1.65; color: #1A1A1A; text-align: justify; font-family: 'Inter', sans-serif; flex: 0 0 auto; overflow: hidden;">
     <%- article.content %>
   </div>
 
   <% if (article.editor_analysis) { %>
-    <div class="card-editor-analysis" id="fullCardEditorAnalysis" style="margin-top: 20px; padding: 20px; background-color: #FFF5F5; border-left: 4px solid #C53030; border-radius: 4px; font-family: 'Inter', sans-serif; text-align: left; box-sizing: border-box;">
-      <div style="font-weight: 800; font-family: 'Playfair Display', serif; font-size: 15px; color: #1A1A1A; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+    <div class="card-editor-analysis" id="fullCardEditorAnalysis" style="margin-top: 20px; padding: 22px; background-color: #FFF5F5; border-left: 4px solid #C53030; border-radius: 4px; font-family: 'Inter', sans-serif; text-align: left; box-sizing: border-box;">
+      <div style="font-weight: 800; font-family: 'Playfair Display', serif; font-size: 19px; color: #1A1A1A; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
         <span>⭐</span> <span>Analiz</span>
       </div>
-      <div style="font-size: 13.5px; line-height: 1.6; color: #2D3748; white-space: pre-wrap;"><%= article.editor_analysis %></div>
+      <div style="font-size: 16.5px; line-height: 1.6; color: #2D3748; white-space: pre-wrap;"><%= article.editor_analysis %></div>
     </div>
   <% } %>
-  
-  <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E8E4DE; padding-top: 20px; margin-top: auto; box-sizing: border-box; width: 100%;">
-    <div style="font-size: 11px; color: #718096;"><%= formatDate(article.published_at || article.created_at) %></div>
-    <div id="fullCardPageNumber" style="font-size: 12px; font-weight: 700; color: #C53030; font-family: 'Inter', sans-serif;"></div>
-    <div style="font-size: 12px; font-weight: 600; color: #1A1A1A;">europolitika.org</div>
+
+  <!-- margin-top: auto pins the footer to the bottom edge while the text block
+       above keeps its natural height, so the analysis box stays with the text. -->
+  <div id="fullCardFooter" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E8E4DE; padding-top: 16px; margin-top: auto; box-sizing: border-box; width: 100%;">
+    <div style="font-size: 13px; color: #718096;"><%= formatDate(article.published_at || article.created_at) %></div>
+    <div id="fullCardPageNumber" style="font-size: 14px; font-weight: 700; color: #C53030; font-family: 'Inter', sans-serif;"></div>
+    <div style="font-size: 14px; font-weight: 600; color: #1A1A1A;">europolitika.org</div>
   </div>
 </div>
 
@@ -730,61 +751,187 @@
     let fullArticlePages = [];
     let currentFullPageIdx = 0;
 
-    // Helper to paginate HTML content based on hybrid word limit & vertical pixel height
-    const paginateContent = (htmlContent) => {
-      // Create a temporary hidden container with the exact same width and font properties
-      const tester = document.createElement('div');
-      tester.style.cssText = 'position: absolute; left: -9999px; top: -9999px; width: 870px; font-size: 14.5px; line-height: 1.72; font-family: Inter, sans-serif; text-align: justify; box-sizing: border-box;';
-      document.body.appendChild(tester);
+    // ---- A4 geometry shared by the Full card and the PDF exporter -------------
+    // The Full card is authored at the same width/height ratio as the printable
+    // A4 area, so a captured page fills the sheet edge to edge instead of
+    // leaving a dead band at the bottom.
+    const PDF_MARGIN_MM = 6;
+    const A4_WIDTH_MM = 210;
+    const A4_HEIGHT_MM = 297;
+    const FULL_CARD_WIDTH_PX = 960;
+    const FULL_CARD_HEIGHT_PX = Math.round(
+      FULL_CARD_WIDTH_PX * (A4_HEIGHT_MM - PDF_MARGIN_MM * 2) / (A4_WIDTH_MM - PDF_MARGIN_MM * 2)
+    );
 
-      const temp = document.createElement('div');
-      temp.innerHTML = htmlContent;
-      
-      const pages = [];
-      let currentPageHTML = '';
-      let currentWordCount = 0;
-      
-      const getWordCount = (el) => {
-        return el.textContent.trim().split(/\s+/).filter(w => w.length > 0).length;
+    const fullCardEl = document.getElementById('shareCardTemplateFull');
+    if (fullCardEl) {
+      fullCardEl.style.width = FULL_CARD_WIDTH_PX + 'px';
+      fullCardEl.style.height = FULL_CARD_HEIGHT_PX + 'px';
+    }
+
+    const numOr0 = (value) => {
+      const parsed = parseFloat(value);
+      return isNaN(parsed) ? 0 : parsed;
+    };
+
+    // Outer height of a card child, ignoring hidden ones.
+    const outerHeight = (el) => {
+      if (!el) return 0;
+      const cs = getComputedStyle(el);
+      if (cs.display === 'none') return 0;
+      return el.getBoundingClientRect().height + numOr0(cs.marginTop) + numOr0(cs.marginBottom);
+    };
+
+    // Wait for images inside a node so height measurements aren't taken while
+    // pictures still report zero height.
+    const waitForImages = (root) => {
+      const pending = Array.from(root.querySelectorAll('img')).filter(img => !img.complete);
+      if (pending.length === 0) return Promise.resolve();
+      return Promise.all(pending.map(img => new Promise(resolve => {
+        const done = () => resolve();
+        img.addEventListener('load', done, { once: true });
+        img.addEventListener('error', done, { once: true });
+        setTimeout(done, 3000);
+      })));
+    };
+
+    // How much vertical room the text block actually gets on a first page, a
+    // middle page and the closing page (which also carries the analysis box).
+    const measureFullContentBudgets = () => {
+      const card = fullCardEl;
+      const content = document.getElementById('fullCardContent');
+      if (!card || !content) return { first: 420, middle: 900, last: 700 };
+
+      const header = document.getElementById('fullCardHeader');
+      const cover = document.getElementById('fullCardCoverImage');
+      const leftCol = document.getElementById('fullCardLeftCol');
+      const editor = document.getElementById('fullCardEditorAnalysis');
+      const footer = document.getElementById('fullCardFooter');
+
+      const saved = {
+        content: content.innerHTML,
+        cover: cover ? cover.style.display : null,
+        leftCol: leftCol ? leftCol.style.display : null,
+        editor: editor ? editor.style.display : null,
+        footerMargin: footer ? footer.style.marginTop : null
       };
-      
-      // Loop over children elements to guarantee no paragraph, header, or list item is skipped
-      const elements = Array.from(temp.children);
-      
-      elements.forEach(el => {
-        const words = getWordCount(el);
-        
-        // Append clone to tester to check height
-        const clone = el.cloneNode(true);
-        tester.appendChild(clone);
-        
-        const currentHeight = tester.offsetHeight;
-        
-        const isPage1 = pages.length === 0;
-        const wordLimit = isPage1 ? 320 : 490; // target 450-500 words for later pages
-        const heightLimit = isPage1 ? 410 : 890; // safe pixel height limits
-        
-        // Enforce min 200 words for page 1 before splitting
-        const enforceMinWords = isPage1 ? (currentWordCount >= 200) : true;
-        
-        if (currentWordCount > 0 && enforceMinWords && (currentWordCount + words > wordLimit || currentHeight > heightLimit)) {
-          pages.push(currentPageHTML);
-          currentPageHTML = '';
-          currentWordCount = 0;
-          tester.innerHTML = '';
-          tester.appendChild(el.cloneNode(true));
-        }
-        
-        currentPageHTML += el.outerHTML;
-        currentWordCount += words;
-      });
-      
-      if (currentPageHTML.trim().length > 0) {
-        pages.push(currentPageHTML);
+      content.innerHTML = '';
+      // The footer's `margin-top: auto` swallows the free space we are trying to
+      // measure, so neutralise it for the duration of the measurement.
+      if (footer) footer.style.marginTop = '0px';
+
+      const cs = getComputedStyle(card);
+      const innerHeight = FULL_CARD_HEIGHT_PX
+        - numOr0(cs.paddingTop) - numOr0(cs.paddingBottom)
+        - numOr0(cs.borderTopWidth) - numOr0(cs.borderBottomWidth);
+
+      // Content block keeps a top margin of 0, so only siblings are subtracted.
+      const chrome = (withHero, withAnalysis) => {
+        if (cover) cover.style.display = withHero ? 'block' : 'none';
+        if (leftCol) leftCol.style.display = withHero ? 'flex' : 'none';
+        if (editor) editor.style.display = withAnalysis ? 'block' : 'none';
+        return outerHeight(header) + outerHeight(cover) + outerHeight(leftCol)
+             + outerHeight(editor) + outerHeight(footer);
+      };
+
+      // 4% safety margin absorbs sub-pixel rounding between measure and capture.
+      const budget = (withHero, withAnalysis) =>
+        Math.max(200, Math.floor((innerHeight - chrome(withHero, withAnalysis)) * 0.96));
+
+      const budgets = {
+        first: budget(true, false),
+        middle: budget(false, false),
+        last: budget(false, true),
+        only: budget(true, true)
+      };
+
+      content.innerHTML = saved.content;
+      if (cover) cover.style.display = saved.cover;
+      if (leftCol) leftCol.style.display = saved.leftCol;
+      if (editor) editor.style.display = saved.editor;
+      if (footer) footer.style.marginTop = saved.footerMargin;
+      return budgets;
+    };
+
+    // Split the article into pages by measuring inside the real content block,
+    // so the trial layout uses the exact fonts, widths and margin overrides of
+    // the printed card.
+    const paginateContent = async (htmlContent) => {
+      const content = document.getElementById('fullCardContent');
+      if (!content) return [htmlContent];
+
+      await waitForImages(fullCardEl || content);
+      const budgets = measureFullContentBudgets();
+
+      const saved = content.innerHTML;
+      const savedFlex = content.style.flex;
+      const savedOverflow = content.style.overflow;
+      // Let the block report its natural height while we measure.
+      content.style.flex = '0 0 auto';
+      content.style.overflow = 'visible';
+
+      const source = document.createElement('div');
+      source.innerHTML = htmlContent;
+      const elements = Array.from(source.children);
+
+      const isHeading = (el) => /^H[1-6]$/.test(el.tagName);
+
+      // Greedily fill a page, then start a new one as soon as it overflows.
+      const fill = (items, firstLimit, restLimit) => {
+        const pages = [];
+        let buffer = [];   // element nodes queued on the page being filled
+        content.innerHTML = '';
+
+        const flush = () => {
+          pages.push(buffer.map(el => el.outerHTML).join(''));
+          buffer = [];
+          content.innerHTML = '';
+        };
+
+        items.forEach(el => {
+          content.appendChild(el.cloneNode(true));
+          const limit = pages.length === 0 ? firstLimit : restLimit;
+
+          if (buffer.length > 0 && content.scrollHeight > limit) {
+            // Don't leave a heading stranded at the foot of a page with none of
+            // its text — carry it over with the paragraph that follows it.
+            const carried = [];
+            while (buffer.length > 1 && isHeading(buffer[buffer.length - 1])) {
+              carried.unshift(buffer.pop());
+            }
+            flush();
+            carried.concat([el]).forEach(node => content.appendChild(node.cloneNode(true)));
+            buffer = carried.slice();
+          }
+          buffer.push(el);
+        });
+
+        if (buffer.length > 0) flush();
+        return pages;
+      };
+
+      let pages = fill(elements, budgets.first, budgets.middle);
+
+      // The closing page also carries the analysis box, so it has less room than
+      // the pages before it. Push its overflow onto extra pages until it fits.
+      for (let guard = 0; pages.length > 0 && guard < 12; guard++) {
+        const lastLimit = pages.length === 1 ? budgets.only : budgets.last;
+        const tail = document.createElement('div');
+        tail.innerHTML = pages[pages.length - 1];
+        const tailItems = Array.from(tail.children);
+
+        content.innerHTML = pages[pages.length - 1];
+        if (content.scrollHeight <= lastLimit || tailItems.length < 2) break;
+
+        const reflowed = fill(tailItems, lastLimit, budgets.middle);
+        if (reflowed.length < 2) break;
+        pages = pages.slice(0, -1).concat(reflowed);
       }
-      
-      document.body.removeChild(tester);
-      return pages;
+
+      content.innerHTML = saved;
+      content.style.flex = savedFlex;
+      content.style.overflow = savedOverflow;
+      return pages.length > 0 ? pages : [htmlContent];
     };
 
     const renderActiveTemplate = async () => {
@@ -800,7 +947,7 @@
       if (activeTemplate === 'Full') {
         if (fullArticlePages.length === 0) {
           const originalContent = document.querySelector('.article-content').innerHTML;
-          fullArticlePages = paginateContent(originalContent);
+          fullArticlePages = await paginateContent(originalContent);
         }
         
         document.getElementById('fullArticlePagination').style.display = 'flex';
@@ -820,7 +967,7 @@
         
         const coverImg = document.getElementById('fullCardCoverImage');
         if (coverImg) {
-          coverImg.style.display = currentFullPageIdx === 0 ? 'flex' : 'none';
+          coverImg.style.display = currentFullPageIdx === 0 ? 'block' : 'none';
         }
         
         const contentBlock = document.getElementById('fullCardContent');
@@ -984,7 +1131,7 @@
           for (let i = 0; i < fullArticlePages.length; i++) {
             // Apply current page values to template for canvas generation
             if (leftCol) leftCol.style.display = i === 0 ? 'flex' : 'none';
-            if (coverImg) coverImg.style.display = i === 0 ? 'flex' : 'none';
+            if (coverImg) coverImg.style.display = i === 0 ? 'block' : 'none';
             if (contentBlock) contentBlock.innerHTML = fullArticlePages[i];
             if (editorBox) editorBox.style.display = i === fullArticlePages.length - 1 ? 'block' : 'none';
             if (pageNumFooter) pageNumFooter.textContent = `Sayfa ${i + 1} / ${fullArticlePages.length}`;
@@ -1021,7 +1168,7 @@
         } finally {
           // Restore user's current preview state
           if (leftCol) leftCol.style.display = originalPageIdx === 0 ? 'flex' : 'none';
-          if (coverImg) coverImg.style.display = originalPageIdx === 0 ? 'flex' : 'none';
+          if (coverImg) coverImg.style.display = originalPageIdx === 0 ? 'block' : 'none';
           if (contentBlock) contentBlock.innerHTML = fullArticlePages[originalPageIdx];
           if (editorBox) editorBox.style.display = originalPageIdx === fullArticlePages.length - 1 ? 'block' : 'none';
           if (pageNumFooter) pageNumFooter.textContent = `Sayfa ${originalPageIdx + 1} / ${fullArticlePages.length}`;
@@ -1058,8 +1205,27 @@
           const pdf = new jsPDF('p', 'mm', 'a4');
           const pageWidth = pdf.internal.pageSize.getWidth();
           const pageHeight = pdf.internal.pageSize.getHeight();
-          const margin = 8;
+          const margin = PDF_MARGIN_MM;
           const usableWidth = pageWidth - (margin * 2);
+          const usableHeight = pageHeight - (margin * 2);
+
+          const paintBackground = (rgb) => {
+            pdf.setFillColor(rgb[0], rgb[1], rgb[2]);
+            pdf.rect(0, 0, pageWidth, pageHeight, 'F');
+          };
+
+          // Scale a captured card into the printable area without distorting it,
+          // then centre it. The Full card matches the A4 ratio, so this fills
+          // the sheet instead of leaving an empty strip along the bottom.
+          const placeCanvas = (sourceCanvas) => {
+            const fit = Math.min(usableWidth / sourceCanvas.width, usableHeight / sourceCanvas.height);
+            const w = sourceCanvas.width * fit;
+            const h = sourceCanvas.height * fit;
+            pdf.addImage(
+              sourceCanvas.toDataURL('image/jpeg', 0.92), 'JPEG',
+              (pageWidth - w) / 2, (pageHeight - h) / 2, w, h
+            );
+          };
 
           if (activeTemplate === 'Full' && fullArticlePages.length > 0) {
             // Multi-page Full template
@@ -1074,7 +1240,7 @@
             for (let i = 0; i < fullArticlePages.length; i++) {
               // Set page content (same logic as image download)
               if (leftCol) leftCol.style.display = i === 0 ? 'flex' : 'none';
-              if (coverImg) coverImg.style.display = i === 0 ? 'flex' : 'none';
+              if (coverImg) coverImg.style.display = i === 0 ? 'block' : 'none';
               if (contentBlock) contentBlock.innerHTML = fullArticlePages[i];
               if (editorBox) editorBox.style.display = i === fullArticlePages.length - 1 ? 'block' : 'none';
               if (pageNumFooter) pageNumFooter.textContent = `Sayfa ${i + 1} / ${fullArticlePages.length}`;
@@ -1089,21 +1255,16 @@
                 backgroundColor: '#F8F7F4'
               });
 
-              const imgData = canvas.toDataURL('image/jpeg', 0.92);
-              const imgHeight = (canvas.height * usableWidth) / canvas.width;
-
               if (i > 0) pdf.addPage();
-              
+
               // Fill background color first to avoid white edges in A4 PDF
-              pdf.setFillColor(248, 247, 244); // #F8F7F4
-              pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-              
-              pdf.addImage(imgData, 'JPEG', margin, margin, usableWidth, imgHeight);
+              paintBackground([248, 247, 244]); // #F8F7F4
+              placeCanvas(canvas);
             }
 
             // Restore preview to original page
             if (leftCol) leftCol.style.display = originalPageIdx === 0 ? 'flex' : 'none';
-            if (coverImg) coverImg.style.display = originalPageIdx === 0 ? 'flex' : 'none';
+            if (coverImg) coverImg.style.display = originalPageIdx === 0 ? 'block' : 'none';
             if (contentBlock) contentBlock.innerHTML = fullArticlePages[originalPageIdx];
             if (editorBox) editorBox.style.display = originalPageIdx === fullArticlePages.length - 1 ? 'block' : 'none';
             if (pageNumFooter) pageNumFooter.textContent = `Sayfa ${originalPageIdx + 1} / ${fullArticlePages.length}`;
@@ -1125,18 +1286,76 @@
               backgroundColor: bgHex
             });
 
-            const imgData = canvas.toDataURL('image/jpeg', 0.92);
-            const imgHeight = (canvas.height * usableWidth) / canvas.width;
-            
-            // Fill background color first to avoid white edges in A4 PDF
-            if (activeTemplate === 'Dark') {
-              pdf.setFillColor(18, 18, 18); // #121212
+            const bgRgb = activeTemplate === 'Dark' ? [18, 18, 18] : [248, 247, 244];
+            const pageRatio = usableHeight / usableWidth;
+            const cardRatio = canvas.height / canvas.width;
+
+            if (cardRatio <= pageRatio * 1.02) {
+              // Fill background color first to avoid white edges in A4 PDF
+              paintBackground(bgRgb);
+              placeCanvas(canvas);
             } else {
-              pdf.setFillColor(248, 247, 244); // #F8F7F4
+              // Cards like the tall newsletter are much longer than one sheet.
+              // Slice them into page-height bands at full width instead of
+              // shrinking them to an unreadable size or running off the page.
+              const sliceHeight = Math.floor(canvas.width * pageRatio);
+              const sourceCtx = canvas.getContext('2d');
+
+              // Pull a cut back to the nearest empty scanline so a slice never
+              // lands halfway through a line of text. Side borders mean the
+              // outer columns are never blank, so only the interior is sampled.
+              const scanFrom = Math.floor(canvas.width * 0.08);
+              const scanTo = Math.ceil(canvas.width * 0.92);
+              const snapToBlankRow = (idealCut, floorCut) => {
+                const reach = Math.min(idealCut - floorCut, Math.round(sliceHeight * 0.18));
+                if (reach <= 0 || !sourceCtx) return idealCut;
+                let band;
+                try {
+                  band = sourceCtx.getImageData(0, idealCut - reach, canvas.width, reach).data;
+                } catch (e) {
+                  return idealCut; // tainted canvas — fall back to the hard cut
+                }
+                for (let row = reach - 1; row >= 0; row--) {
+                  let blank = true;
+                  for (let x = scanFrom; x < scanTo; x += 3) {
+                    const i = (row * canvas.width + x) * 4;
+                    if (Math.abs(band[i] - bgRgb[0]) > 14 ||
+                        Math.abs(band[i + 1] - bgRgb[1]) > 14 ||
+                        Math.abs(band[i + 2] - bgRgb[2]) > 14) { blank = false; break; }
+                  }
+                  if (blank) return idealCut - reach + row + 1;
+                }
+                return idealCut;
+              };
+
+              let sliceTop = 0;
+              let pageIndex = 0;
+              while (sliceTop < canvas.height) {
+                let sliceBottom = Math.min(sliceTop + sliceHeight, canvas.height);
+                if (sliceBottom < canvas.height) {
+                  sliceBottom = snapToBlankRow(sliceBottom, sliceTop + Math.round(sliceHeight * 0.5));
+                }
+                const thisHeight = sliceBottom - sliceTop;
+
+                const slice = document.createElement('canvas');
+                slice.width = canvas.width;
+                slice.height = thisHeight;
+                const ctx = slice.getContext('2d');
+                ctx.fillStyle = bgHex;
+                ctx.fillRect(0, 0, slice.width, slice.height);
+                ctx.drawImage(canvas, 0, sliceTop, canvas.width, thisHeight, 0, 0, canvas.width, thisHeight);
+
+                if (pageIndex > 0) pdf.addPage();
+                paintBackground(bgRgb);
+                pdf.addImage(
+                  slice.toDataURL('image/jpeg', 0.92), 'JPEG',
+                  margin, margin, usableWidth, (thisHeight * usableWidth) / canvas.width
+                );
+
+                sliceTop = sliceBottom;
+                pageIndex++;
+              }
             }
-            pdf.rect(0, 0, pageWidth, pageHeight, 'F');
-            
-            pdf.addImage(imgData, 'JPEG', margin, margin, usableWidth, imgHeight);
           }
 
           pdf.save('<%= article.slug %>-paylas.pdf');
