@@ -512,7 +512,7 @@
 </div>
 
 <!-- Hidden container for generating shareable image card (Full Article Screenshot style) -->
-<div id="shareCardTemplateFull" style="position: absolute; left: -9999px; top: -9999px; width: 960px; background-color: #F8F7F4; padding: 45px 45px 75px 45px; box-sizing: border-box; border: 4px solid #C53030; border-radius: 12px; font-family: 'Inter', sans-serif; min-height: 1250px; display: flex; flex-direction: column; justify-content: space-between;">
+<div id="shareCardTemplateFull" style="position: absolute; left: -9999px; top: -9999px; width: 960px; background-color: #F8F7F4; padding: 45px 45px 75px 45px; box-sizing: border-box; border: 4px solid #C53030; border-radius: 12px; font-family: 'Inter', sans-serif; height: 1250px; display: flex; flex-direction: column; justify-content: space-between;">
   <style>
     #shareCardTemplateFull .card-full-content-block p {
       margin-top: 0 !important;
@@ -729,7 +729,7 @@
     let currentFullPageIdx = 0;
 
     // Helper to paginate HTML content based on word count
-    const paginateContent = (htmlContent, wordsPerPage = 450) => {
+    const paginateContent = (htmlContent) => {
       const temp = document.createElement('div');
       temp.innerHTML = htmlContent;
       
@@ -748,7 +748,9 @@
         }
         
         const words = getWordCount(node);
-        if (currentWordCount + words > wordsPerPage && currentWordCount > 0) {
+        const limit = pages.length === 0 ? 220 : 380;
+        
+        if (currentWordCount + words > limit && currentWordCount > 0) {
           pages.push(currentPageHTML);
           currentPageHTML = '';
           currentWordCount = 0;
@@ -780,7 +782,7 @@
       if (activeTemplate === 'Full') {
         if (fullArticlePages.length === 0) {
           const originalContent = document.querySelector('.article-content').innerHTML;
-          fullArticlePages = paginateContent(originalContent, 450);
+          fullArticlePages = paginateContent(originalContent);
         }
         
         document.getElementById('fullArticlePagination').style.display = 'flex';
