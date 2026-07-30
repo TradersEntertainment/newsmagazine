@@ -47,7 +47,25 @@ db.exec(`
     subscribed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     is_active INTEGER DEFAULT 1
   );
+
+  -- Every slug an article has ever had, so links already shared keep working
+  -- after a title (and therefore slug) change.
+  CREATE TABLE IF NOT EXISTS article_slugs (
+    slug TEXT PRIMARY KEY,
+    article_id INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
+
+// Backfill the slug history with the slugs articles already have.
+try {
+  db.exec(`
+    INSERT OR IGNORE INTO article_slugs (slug, article_id)
+    SELECT slug, id FROM articles
+  `);
+} catch (e) {
+  // Table is fresh or already populated, nothing to do.
+}
 
 // Run migrations
 try {
@@ -112,6 +130,27 @@ function getArticleBySlug(slug) {
 
 function getArticleById(id) {
   return db.prepare('SELECT * FROM articles WHERE id = ?').get(id);
+}
+
+// --- Slug history (keeps previously shared links alive) ---
+
+function rememberSlug(articleId, slug) {
+  if (!articleId || !slug) return;
+  return db.prepare('INSERT OR IGNORE INTO article_slugs (slug, article_id) VALUES (?, ?)').run(slug, articleId);
+}
+
+// Resolve a slug that is no longer current back to its article.
+function getArticleByOldSlug(slug) {
+  const row = db.prepare('SELECT article_id FROM article_slugs WHERE slug = ?').get(slug);
+  return row ? getArticleById(row.article_id) : null;
+}
+
+// True when the slug is taken by a different article, now or in the past.
+function isSlugTaken(slug, exceptArticleId = null) {
+  const live = db.prepare('SELECT id FROM articles WHERE slug = ?').get(slug);
+  if (live && live.id !== exceptArticleId) return true;
+  const past = db.prepare('SELECT article_id FROM article_slugs WHERE slug = ?').get(slug);
+  return !!(past && past.article_id !== exceptArticleId);
 }
 
 function createArticle({ title, slug, excerpt, content, cover_image, social_image, editor_analysis, key_takeaways, category, tags, status }) {
@@ -194,6 +233,9 @@ module.exports = {
   getAllArticlesFiltered,
   getArticleBySlug,
   getArticleById,
+  getArticleByOldSlug,
+  rememberSlug,
+  isSlugTaken,
   createArticle,
   updateArticle,
   deleteArticle,

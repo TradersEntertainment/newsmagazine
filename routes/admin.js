@@ -8,9 +8,42 @@ const {
   createArticle,
   updateArticle,
   deleteArticle,
+  rememberSlug,
+  isSlugTaken,
   getAllSubscribers,
   getStats
 } = require('../database/db');
+
+// Shared links get pasted into messages, so keep slugs short. Long headlines
+// are cut at a word boundary rather than mid-word.
+const SLUG_MAX_LENGTH = 50;
+
+function buildSlug(title, articleId = null) {
+  const full = slugify(title || '', {
+    lower: true,
+    strict: true,
+    locale: 'tr',
+    remove: /[*+~.()'"!:@]/g
+  });
+
+  let base = full;
+  if (base.length > SLUG_MAX_LENGTH) {
+    const cut = base.slice(0, SLUG_MAX_LENGTH + 1);
+    const lastDash = cut.lastIndexOf('-');
+    // Fall back to a hard cut if the first word alone is longer than the limit.
+    base = lastDash > 0 ? cut.slice(0, lastDash) : base.slice(0, SLUG_MAX_LENGTH);
+  }
+  base = base.replace(/-+$/, '') || 'haber';
+
+  // A slug is taken if any other article uses it now or used it before, since
+  // old slugs still redirect.
+  if (!isSlugTaken(base, articleId)) return base;
+  for (let n = 2; n < 200; n++) {
+    const candidate = `${base}-${n}`;
+    if (!isSlugTaken(candidate, articleId)) return candidate;
+  }
+  return `${base}-${Date.now()}`;
+}
 
 // --- Public admin routes (no auth) ---
 
@@ -80,15 +113,18 @@ router.get('/haberler/:id/duzenle', (req, res) => {
 router.post('/haberler', (req, res) => {
   const { id, title, excerpt, content, cover_image, social_image, editor_analysis, key_takeaways, category, tags, status } = req.body;
 
-  // Generate slug from title with Turkish character support
-  const slug = slugify(title, {
-    lower: true,
-    strict: true,
-    locale: 'tr',
-    remove: /[*+~.()'"!:@]/g
-  });
+  const existing = id ? getArticleById(id) : null;
+
+  // Keep an article's slug stable unless its title actually changed, so links
+  // already in circulation stay canonical.
+  const slug = (existing && existing.title === title)
+    ? existing.slug
+    : buildSlug(title, existing ? existing.id : null);
 
   if (id) {
+    // The old slug keeps redirecting to this article.
+    if (existing && existing.slug !== slug) rememberSlug(existing.id, existing.slug);
+
     // Update existing article
     updateArticle(id, {
       title,
@@ -103,9 +139,10 @@ router.post('/haberler', (req, res) => {
       tags: tags || null,
       status: status || 'draft'
     });
+    if (existing) rememberSlug(existing.id, slug);
   } else {
     // Create new article
-    createArticle({
+    const created = createArticle({
       title,
       slug,
       excerpt,
@@ -118,6 +155,7 @@ router.post('/haberler', (req, res) => {
       tags: tags || null,
       status: status || 'draft'
     });
+    rememberSlug(created && created.lastInsertRowid, slug);
   }
 
   return res.redirect('/admin/haberler');

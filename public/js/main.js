@@ -89,13 +89,54 @@
     });
   }
 
+  /* --- Short share link --- */
+  // Article pages expose /h/<id>; it 301s to the full URL, so it is safe to
+  // hand out anywhere the long one is awkward to paste.
+  function getShareUrl() {
+    var holder = document.querySelector('[data-short-path]');
+    if (holder && holder.dataset.shortPath) {
+      return window.location.origin + holder.dataset.shortPath;
+    }
+    return window.location.href;
+  }
+
+  function initShortLink() {
+    var input = document.getElementById('shortLinkInput');
+    var btn = document.getElementById('btnCopyShortLink');
+    if (!input) return;
+
+    input.value = getShareUrl();
+    input.addEventListener('focus', function () { this.select(); });
+    if (!btn) return;
+
+    btn.addEventListener('click', function () {
+      var original = btn.innerHTML;
+      var done = function (ok) {
+        btn.innerHTML = ok ? '✅ Kopyalandı' : '⚠️ Kopyalanamadı';
+        setTimeout(function () { btn.innerHTML = original; }, 2000);
+      };
+
+      // The async clipboard API needs a secure context, so keep the old
+      // select-and-copy path as a fallback.
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(input.value).then(function () { done(true); }, function () { done(false); });
+        return;
+      }
+      input.select();
+      input.setSelectionRange(0, input.value.length);
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+      done(ok);
+    });
+  }
+
   /* --- Share Button Handlers --- */
   function initShareButtons() {
     document.querySelectorAll('.share-btn').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
         e.preventDefault();
         var platform = this.dataset.platform;
-        var url = encodeURIComponent(window.location.href);
+        var url = encodeURIComponent(getShareUrl());
         var title = encodeURIComponent(document.title);
         var shareUrl = '';
 
@@ -140,6 +181,7 @@
   document.addEventListener('DOMContentLoaded', function () {
     initFadeIn();
     initBackToTop();
+    initShortLink();
     initShareButtons();
     initTheme();
   });

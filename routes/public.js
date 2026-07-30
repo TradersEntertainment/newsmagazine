@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getAllArticles, getAllArticlesFiltered, getArticleBySlug, incrementViews, addSubscriber, getStats } = require('../database/db');
+const { getAllArticles, getAllArticlesFiltered, getArticleBySlug, getArticleById, getArticleByOldSlug, incrementViews, addSubscriber, getStats } = require('../database/db');
 
 // Home page
 router.get('/', (req, res) => {
@@ -26,11 +26,32 @@ router.get('/', (req, res) => {
   });
 });
 
+// Short share link — /h/12 redirects to the article's full URL. Handy when the
+// link has to be pasted into a message; the long URL stays canonical for SEO.
+router.get('/h/:id', (req, res) => {
+  const article = getArticleById(parseInt(req.params.id, 10));
+
+  if (!article) {
+    return res.status(404).render('public/home', {
+      articles: getAllArticles('published', 12, 0),
+      stats: getStats(),
+      error: 'Makale bulunamadı.'
+    });
+  }
+
+  return res.redirect(301, `/haber/${article.slug}`);
+});
+
 // Single article page
 router.get('/haber/:slug', (req, res) => {
   const article = getArticleBySlug(req.params.slug);
 
   if (!article) {
+    // The slug may be one this article used before a title change; send those
+    // visitors on rather than showing them a 404.
+    const renamed = getArticleByOldSlug(req.params.slug);
+    if (renamed) return res.redirect(301, `/haber/${renamed.slug}`);
+
     return res.status(404).render('public/home', {
       articles: getAllArticles('published', 12, 0),
       stats: getStats(),
