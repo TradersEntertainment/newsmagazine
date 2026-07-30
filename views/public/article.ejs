@@ -581,12 +581,6 @@
   <% } %>
 
   <div id="fullCardLeftCol" style="display: flex; flex-direction: column; margin-bottom: 22px;">
-    <% if (hasEditorAnalysis) { %>
-      <!-- line-height 1 makes html2canvas clip the uppercase glyphs, so give the
-           badge real leading instead of relying on padding alone. -->
-      <div style="display: inline-flex; align-items: center; background-color: #C53030; color: #FFFFFF; font-size: 12px; font-weight: 700; padding: 6px 11px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif; line-height: 1.4; align-self: flex-start;"><span style="margin-right: 5px; font-size: 13px; line-height: 1.4;">⭐</span> ANALİZ</div>
-    <% } %>
-
     <h1 style="font-family: 'Playfair Display', serif; font-size: 31px; line-height: 1.28; color: #1A1A1A; margin-top: 0; margin-bottom: 16px; font-weight: 800;"><%= article.title %></h1>
 
     <% if (article.key_takeaways) { %>
