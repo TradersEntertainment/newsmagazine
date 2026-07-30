@@ -520,11 +520,68 @@
     #shareCardTemplateFull .card-full-content-block p:has(> br:only-child) {
       display: none !important;
     }
+
+    /* ---- Karanlık theme -------------------------------------------------
+       The dark card is the same layout in a different palette, so it is a
+       colour overlay on the one card rather than a second copy of the
+       markup. Everything here needs !important to beat the inline styles,
+       including any colours that come baked into the article's own HTML. */
+    #shareCardTemplateFull .card-logo-dark { display: none; }
+    #shareCardTemplateFull.card-dark .card-logo-light { display: none; }
+    #shareCardTemplateFull.card-dark .card-logo-dark { display: inline-block; }
+
+    #shareCardTemplateFull.card-dark {
+      background-color: #121212 !important;
+      border-color: #D69E2E !important;
+    }
+    #shareCardTemplateFull.card-dark #fullCardHeader {
+      border-bottom-color: #2D3748 !important;
+    }
+    #shareCardTemplateFull.card-dark #fullCardHeader .card-header-kicker {
+      color: #A0AEC0 !important;
+    }
+    #shareCardTemplateFull.card-dark #fullCardLeftCol h1 {
+      color: #FFFFFF !important;
+    }
+    #shareCardTemplateFull.card-dark .card-takeaways {
+      background-color: #1A1A1A !important;
+      border-color: #2D3748 !important;
+      border-left-color: #D69E2E !important;
+    }
+    #shareCardTemplateFull.card-dark .card-takeaways-label { color: #D69E2E !important; }
+    #shareCardTemplateFull.card-dark .card-takeaways-list,
+    #shareCardTemplateFull.card-dark .card-takeaways-list li { color: #E2E8F0 !important; }
+
+    #shareCardTemplateFull.card-dark .card-full-content-block,
+    #shareCardTemplateFull.card-dark .card-full-content-block * {
+      color: #E2E8F0 !important;
+    }
+    #shareCardTemplateFull.card-dark .card-full-content-block h2,
+    #shareCardTemplateFull.card-dark .card-full-content-block h3,
+    #shareCardTemplateFull.card-dark .card-full-content-block strong,
+    #shareCardTemplateFull.card-dark .card-full-content-block b {
+      color: #FFFFFF !important;
+    }
+    #shareCardTemplateFull.card-dark .card-full-content-block a {
+      color: #F6AD55 !important;
+    }
+
+    #shareCardTemplateFull.card-dark .card-editor-analysis {
+      background-color: #1A1A1A !important;
+      border-left-color: #D69E2E !important;
+    }
+    #shareCardTemplateFull.card-dark .card-editor-analysis .card-analysis-title { color: #FFFFFF !important; }
+    #shareCardTemplateFull.card-dark .card-editor-analysis .card-analysis-body { color: #CBD5E0 !important; }
+
+    #shareCardTemplateFull.card-dark #fullCardFooter { border-top-color: #2D3748 !important; }
+    #shareCardTemplateFull.card-dark .card-footer-date { color: #A0AEC0 !important; }
+    #shareCardTemplateFull.card-dark #fullCardPageNumber { color: #D69E2E !important; }
+    #shareCardTemplateFull.card-dark .card-footer-site a { color: #FFFFFF !important; }
   </style>
 
   <div id="fullCardHeader" style="text-align: center; border-bottom: 2px solid #1A1A1A; padding-bottom: 18px; margin-bottom: 22px;">
-    <%- getLogoLight(48) %>
-    <div style="font-size: 13px; text-transform: uppercase; letter-spacing: 3px; color: #718096; margin-top: 6px; font-weight: 700;">Haftalık Politik Ekonomi Bülteni</div>
+    <span class="card-logo-light"><%- getLogoLight(48) %></span><span class="card-logo-dark"><%- getLogoDark(48) %></span>
+    <div class="card-header-kicker" style="font-size: 13px; text-transform: uppercase; letter-spacing: 3px; color: #718096; margin-top: 6px; font-weight: 700;">Haftalık Politik Ekonomi Bülteni</div>
   </div>
 
   <% if (article.cover_image) { %>
@@ -537,11 +594,11 @@
     <h1 style="font-family: 'Playfair Display', serif; font-size: 31px; line-height: 1.28; color: #1A1A1A; margin-top: 0; margin-bottom: 16px; font-weight: 800;"><%= article.title %></h1>
 
     <% if (article.key_takeaways) { %>
-      <div style="background-color: #F8F7F4; border: 1px solid #E8E4DE; border-left: 5px solid #3182CE; border-radius: 8px; padding: 16px 18px; font-family: 'Inter', sans-serif;">
-        <div style="font-size: 13px; font-weight: 800; color: #3182CE; text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+      <div class="card-takeaways" style="background-color: #F8F7F4; border: 1px solid #E8E4DE; border-left: 5px solid #3182CE; border-radius: 8px; padding: 16px 18px; font-family: 'Inter', sans-serif;">
+        <div class="card-takeaways-label" style="font-size: 13px; font-weight: 800; color: #3182CE; text-transform: uppercase; letter-spacing: 2.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
           <span>💡</span> <span>3 Maddede Öne Çıkanlar</span>
         </div>
-        <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 7px; color: #2D3748; font-size: 16px; line-height: 1.45; font-weight: 500;">
+        <ul class="card-takeaways-list" style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 7px; color: #2D3748; font-size: 16px; line-height: 1.45; font-weight: 500;">
           <% article.key_takeaways.split('\n').map(l => l.trim()).filter(l => l.length > 2).forEach(function(bullet) { %>
             <li><%= bullet %></li>
           <% }); %>
@@ -556,19 +613,19 @@
 
   <% if (article.editor_analysis) { %>
     <div class="card-editor-analysis" id="fullCardEditorAnalysis" style="margin-top: 20px; padding: 22px; background-color: #FFF5F5; border-left: 4px solid #C53030; border-radius: 4px; font-family: 'Inter', sans-serif; text-align: left; box-sizing: border-box;">
-      <div style="font-weight: 800; font-family: 'Playfair Display', serif; font-size: 19px; color: #1A1A1A; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+      <div class="card-analysis-title" style="font-weight: 800; font-family: 'Playfair Display', serif; font-size: 19px; color: #1A1A1A; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
         <span>⭐</span> <span>Analiz</span>
       </div>
-      <div style="font-size: 16.5px; line-height: 1.6; color: #2D3748; white-space: pre-wrap;"><%= article.editor_analysis %></div>
+      <div class="card-analysis-body" style="font-size: 16.5px; line-height: 1.6; color: #2D3748; white-space: pre-wrap;"><%= article.editor_analysis %></div>
     </div>
   <% } %>
 
   <!-- margin-top: auto pins the footer to the bottom edge while the text block
        above keeps its natural height, so the analysis box stays with the text. -->
   <div id="fullCardFooter" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E8E4DE; padding-top: 16px; margin-top: auto; box-sizing: border-box; width: 100%;">
-    <div style="font-size: 13px; color: #718096;"><%= formatDate(article.published_at || article.created_at) %></div>
+    <div class="card-footer-date" style="font-size: 13px; color: #718096;"><%= formatDate(article.published_at || article.created_at) %></div>
     <div id="fullCardPageNumber" style="font-size: 14px; font-weight: 700; color: #C53030; font-family: 'Inter', sans-serif;"></div>
-    <div style="font-size: 14px; font-weight: 600;"><a href="https://europolitika.org" style="color: #1A1A1A; text-decoration: none;">europolitika.org</a></div>
+    <div class="card-footer-site" style="font-size: 14px; font-weight: 600;"><a href="https://europolitika.org" style="color: #1A1A1A; text-decoration: none;">europolitika.org</a></div>
   </div>
 </div>
 
@@ -867,6 +924,16 @@
       return 'shareCardTemplateFull';
     };
 
+    // Karanlık is the same card in a dark palette, switched by a class.
+    const isDarkTemplate = (template) => template === 'Dark';
+    const CARD_BG_LIGHT = '#F8F7F4';
+    const CARD_BG_DARK = '#121212';
+    const cardBackground = (template) => (isDarkTemplate(template) ? CARD_BG_DARK : CARD_BG_LIGHT);
+
+    const applyCardTheme = (template) => {
+      if (fullCardEl) fullCardEl.classList.toggle('card-dark', isDarkTemplate(template));
+    };
+
     // Put the Full card into the state for one page of the bulletin.
     const applyFullCardPage = (pageIdx) => {
       const total = fullArticlePages.length;
@@ -896,6 +963,7 @@
 
       if (usesFullCard(activeTemplate)) {
         await ensureFullArticlePages();
+        applyCardTheme(activeTemplate);
 
         // Only Tüm Haber lets the reader page through the bulletin.
         const paged = activeTemplate === 'Full';
@@ -923,9 +991,9 @@
           allowTaint: true,
           useCORS: true,
           scale: 2,
-          backgroundColor: '#F8F7F4'
+          backgroundColor: cardBackground(activeTemplate)
         });
-        
+
         currentDataUrl = canvas.toDataURL('image/png');
         
         previewContainer.innerHTML = '';
@@ -1063,9 +1131,9 @@
               allowTaint: true,
               useCORS: true,
               scale: 2,
-              backgroundColor: '#F8F7F4'
+              backgroundColor: cardBackground(activeTemplate)
             });
-            
+
             const dataUrl = canvas.toDataURL('image/png');
             const link = document.createElement('a');
             link.download = `<%= article.slug %>-paylas-sayfa${i + 1}.png`;
@@ -1206,7 +1274,7 @@
                 allowTaint: true,
                 useCORS: true,
                 scale: 2,
-                backgroundColor: '#F8F7F4'
+                backgroundColor: cardBackground(activeTemplate)
               });
 
               if (i > 0) pdf.addPage();
@@ -1230,12 +1298,13 @@
           } else {
             // Single-sheet templates: Klasik and Karanlık (the bulletin's first
             // page), Alıntı, Uzun, or a Tüm Haber article short enough to fit.
-            const bgHex = '#F8F7F4';
+            const bgHex = cardBackground(activeTemplate);
             const shareCard = document.getElementById(templateCardId(activeTemplate));
 
             // Klasik/Karanlık always export the opening page, whichever page
             // the preview was last left on.
             if (FIRST_PAGE_TEMPLATES.includes(activeTemplate) && fullArticlePages.length > 0) {
+              applyCardTheme(activeTemplate);
               applyFullCardPage(0);
               await sleep(350);
             }
@@ -1247,7 +1316,7 @@
               backgroundColor: bgHex
             });
 
-            const bgRgb = [248, 247, 244];
+            const bgRgb = isDarkTemplate(activeTemplate) ? [18, 18, 18] : [248, 247, 244];
             const pageRatio = usableHeight / usableWidth;
             const cardRatio = canvas.height / canvas.width;
 
