@@ -415,7 +415,7 @@
   
   <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E8E4DE; padding-top: 20px;">
     <div style="font-size: 12px; color: #718096;"><%= formatDate(article.published_at || article.created_at) %></div>
-    <div style="font-size: 13px; font-weight: 600; color: #1A1A1A;">europolitika.org</div>
+    <div style="font-size: 13px; font-weight: 600;"><a href="https://europolitika.org" style="color: #1A1A1A; text-decoration: none;">europolitika.org</a></div>
   </div>
 </div>
 
@@ -446,7 +446,7 @@
   
   <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #2D3748; padding-top: 20px;">
     <div style="font-size: 12px; color: #A0AEC0;"><%= formatDate(article.published_at || article.created_at) %></div>
-    <div style="font-size: 13px; font-weight: 600; color: #FFFFFF;">europolitika.org</div>
+    <div style="font-size: 13px; font-weight: 600;"><a href="https://europolitika.org" style="color: #FFFFFF; text-decoration: none;">europolitika.org</a></div>
   </div>
 </div>
 
@@ -469,7 +469,7 @@
   
   <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E8E4DE; padding-top: 20px; text-align: left;">
     <div style="font-size: 12px; color: #718096;"><%= formatDate(article.published_at || article.created_at) %></div>
-    <div style="font-size: 13px; font-weight: 600; color: #1A1A1A;">europolitika.org</div>
+    <div style="font-size: 13px; font-weight: 600;"><a href="https://europolitika.org" style="color: #1A1A1A; text-decoration: none;">europolitika.org</a></div>
   </div>
 </div>
 
@@ -507,7 +507,7 @@
   
   <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E8E4DE; padding-top: 20px;">
     <div style="font-size: 11px; color: #718096;"><%= formatDate(article.published_at || article.created_at) %></div>
-    <div style="font-size: 12px; font-weight: 600; color: #1A1A1A;">europolitika.org</div>
+    <div style="font-size: 12px; font-weight: 600;"><a href="https://europolitika.org" style="color: #1A1A1A; text-decoration: none;">europolitika.org</a></div>
   </div>
 </div>
 
@@ -615,7 +615,7 @@
   <div id="fullCardFooter" style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E8E4DE; padding-top: 16px; margin-top: auto; box-sizing: border-box; width: 100%;">
     <div style="font-size: 13px; color: #718096;"><%= formatDate(article.published_at || article.created_at) %></div>
     <div id="fullCardPageNumber" style="font-size: 14px; font-weight: 700; color: #C53030; font-family: 'Inter', sans-serif;"></div>
-    <div style="font-size: 14px; font-weight: 600; color: #1A1A1A;">europolitika.org</div>
+    <div style="font-size: 14px; font-weight: 600;"><a href="https://europolitika.org" style="color: #1A1A1A; text-decoration: none;">europolitika.org</a></div>
   </div>
 </div>
 
@@ -1211,14 +1211,62 @@
           // Scale a captured card into the printable area without distorting it,
           // then centre it. The Full card matches the A4 ratio, so this fills
           // the sheet instead of leaving an empty strip along the bottom.
+          // Returns where the image landed, so link boxes can be placed on top.
           const placeCanvas = (sourceCanvas) => {
             const fit = Math.min(usableWidth / sourceCanvas.width, usableHeight / sourceCanvas.height);
             const w = sourceCanvas.width * fit;
             const h = sourceCanvas.height * fit;
-            pdf.addImage(
-              sourceCanvas.toDataURL('image/jpeg', 0.92), 'JPEG',
-              (pageWidth - w) / 2, (pageHeight - h) / 2, w, h
-            );
+            const x = (pageWidth - w) / 2;
+            const y = (pageHeight - h) / 2;
+            pdf.addImage(sourceCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', x, y, w, h);
+            return { fit, x, y };
+          };
+
+          // html2canvas flattens the card into a bitmap, so anchors stop being
+          // clickable. Re-attach them as PDF link annotations laid over the
+          // image at the position each anchor occupied in the card.
+          //
+          // html2canvas paints text lower than the DOM reports it — measured at
+          // a steady 10-15 CSS px on this card, independent of font size, line
+          // height, padding and borders. So nudge each hit area down by roughly
+          // that much and add slack on both sides, which keeps the box over the
+          // glyphs whether or not the renderer shifts them.
+          const LINK_NUDGE_PX = 8;
+          const LINK_SLACK_PX = 10;
+          const LINK_SLACK_X_PX = 4;   // advance widths differ slightly too
+
+          //   mmPerCardPx  millimetres per CSS pixel of the card
+          //   originX/Y    where the visible band starts on the sheet, in mm
+          //   bandTop/Bot  the slice of the card this page shows, in card px
+          const addLinkAnnotations = (cardEl, { mmPerCardPx, originX, originY, bandTop, bandBottom }) => {
+            const cardRect = cardEl.getBoundingClientRect();
+            cardEl.querySelectorAll('a[href]').forEach(anchor => {
+              const url = anchor.href;
+              if (!/^(https?:|mailto:)/i.test(url)) return;
+              const cs = getComputedStyle(anchor);
+              if (cs.display === 'none' || cs.visibility === 'hidden') return;
+
+              // One box per line fragment, so wrapped links stay fully clickable.
+              Array.from(anchor.getClientRects()).forEach(rect => {
+                if (rect.width < 1 || rect.height < 1) return;
+
+                let top = rect.top - cardRect.top + LINK_NUDGE_PX - LINK_SLACK_PX;
+                let bottom = rect.bottom - cardRect.top + LINK_NUDGE_PX + LINK_SLACK_PX;
+                // Clip to the band this page shows. The card hides its overflow,
+                // so text on other pages still reports a rect here.
+                top = Math.max(top, bandTop);
+                bottom = Math.min(bottom, bandBottom);
+                if (bottom - top < 1) return;
+
+                pdf.link(
+                  originX + (rect.left - cardRect.left - LINK_SLACK_X_PX) * mmPerCardPx,
+                  originY + (top - bandTop) * mmPerCardPx,
+                  (rect.width + LINK_SLACK_X_PX * 2) * mmPerCardPx,
+                  (bottom - top) * mmPerCardPx,
+                  { url }
+                );
+              });
+            });
           };
 
           if (activeTemplate === 'Full' && fullArticlePages.length > 0) {
@@ -1253,7 +1301,16 @@
 
               // Fill background color first to avoid white edges in A4 PDF
               paintBackground([248, 247, 244]); // #F8F7F4
-              placeCanvas(canvas);
+              const placed = placeCanvas(canvas);
+
+              const cardWidthPx = shareCard.getBoundingClientRect().width;
+              addLinkAnnotations(shareCard, {
+                mmPerCardPx: placed.fit * canvas.width / cardWidthPx,
+                originX: placed.x,
+                originY: placed.y,
+                bandTop: 0,
+                bandBottom: shareCard.getBoundingClientRect().height
+              });
             }
 
             // Restore preview to original page
@@ -1284,10 +1341,20 @@
             const pageRatio = usableHeight / usableWidth;
             const cardRatio = canvas.height / canvas.width;
 
+            const cardWidthPx = shareCard.getBoundingClientRect().width;
+            const captureScale = canvas.width / cardWidthPx;
+
             if (cardRatio <= pageRatio * 1.02) {
               // Fill background color first to avoid white edges in A4 PDF
               paintBackground(bgRgb);
-              placeCanvas(canvas);
+              const placed = placeCanvas(canvas);
+              addLinkAnnotations(shareCard, {
+                mmPerCardPx: placed.fit * captureScale,
+                originX: placed.x,
+                originY: placed.y,
+                bandTop: 0,
+                bandBottom: canvas.height / captureScale
+              });
             } else {
               // Cards like the tall newsletter are much longer than one sheet.
               // Slice them into page-height bands at full width instead of
@@ -1345,6 +1412,14 @@
                   slice.toDataURL('image/jpeg', 0.92), 'JPEG',
                   margin, margin, usableWidth, (thisHeight * usableWidth) / canvas.width
                 );
+
+                addLinkAnnotations(shareCard, {
+                  mmPerCardPx: usableWidth / cardWidthPx,
+                  originX: margin,
+                  originY: margin,
+                  bandTop: sliceTop / captureScale,
+                  bandBottom: sliceBottom / captureScale
+                });
 
                 sliceTop = sliceBottom;
                 pageIndex++;
