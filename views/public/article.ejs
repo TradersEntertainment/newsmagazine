@@ -398,68 +398,10 @@
 </div>
 <% } %>
 
-<!-- Hidden container for generating shareable image card (Classic) -->
-<div id="shareCardTemplate" style="position: absolute; left: -9999px; top: -9999px; width: 600px; background-color: #F8F7F4; padding: 40px; box-sizing: border-box; border: 4px solid #C53030; border-radius: 12px; font-family: 'Inter', sans-serif;">
-  <div style="text-align: center; border-bottom: 2px solid #E8E4DE; padding-bottom: 15px; margin-bottom: 25px;">
-    <%- getLogoLight(36) %>
-    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: #718096; margin-top: 4px;">Politik Ekonomi Bülteni</div>
-  </div>
-  
-  <% const hasEditorAnalysis = article.editor_analysis || article.category === 'Analiz' || article.category === 'Bülten' || (article.content && article.content.includes('Analiz #')); %>
-  <% if (hasEditorAnalysis) { %>
-    <div style="display: inline-flex; align-items: center; background-color: #C53030; color: #FFFFFF; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif; line-height: 1;"><span style="margin-right: 4px; font-size: 11px; line-height: 1;">⭐</span> ÖZEL EDİTÖR ANALİZİ</div>
-  <% } else if (article.category) { %>
-    <div style="font-size: 12px; font-weight: 700; color: #C53030; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;"><%= article.category %></div>
-  <% } %>
-  
-  <h1 style="font-family: 'Playfair Display', serif; font-size: 28px; line-height: 1.35; color: #1A1A1A; margin-bottom: 20px; font-weight: 800;"><%= article.title %></h1>
-  
-  <% if (article.cover_image) { %>
-    <div style="width: 100%; height: 300px; border-radius: 8px; overflow: hidden; margin-bottom: 25px; border: 1px solid #E8E4DE;">
-      <img src="<%= article.cover_image %>" style="width: 100%; height: 100%; object-fit: cover;" crossorigin="anonymous">
-    </div>
-  <% } %>
-  
-  <div class="card-description-block" style="font-size: 15px; line-height: 1.6; color: #333; margin-bottom: 30px; font-weight: 400;">
-    <%= article.excerpt || (article.content ? truncate(article.content.replace(/<[^>]*>/g, ''), 250) : '') %>
-  </div>
-  
-  <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #E8E4DE; padding-top: 20px;">
-    <div style="font-size: 12px; color: #718096;"><%= formatDate(article.published_at || article.created_at) %></div>
-    <div style="font-size: 13px; font-weight: 600;"><a href="https://europolitika.org" style="color: #1A1A1A; text-decoration: none;">europolitika.org</a></div>
-  </div>
-</div>
-
-<!-- Hidden container for generating shareable image card (Dark Minimalist) -->
-<div id="shareCardTemplateDark" style="position: absolute; left: -9999px; top: -9999px; width: 600px; background-color: #121212; padding: 40px; box-sizing: border-box; border: 4px solid #D69E2E; border-radius: 12px; font-family: 'Inter', sans-serif;">
-  <div style="text-align: center; border-bottom: 2px solid #2D3748; padding-bottom: 15px; margin-bottom: 25px;">
-    <%- getLogoDark(36) %>
-    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: #A0AEC0; margin-top: 4px;">Politik Ekonomi Bülteni</div>
-  </div>
-  
-  <% if (hasEditorAnalysis) { %>
-    <div style="display: inline-flex; align-items: center; background-color: #D69E2E; color: #121212; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif; line-height: 1;"><span style="margin-right: 4px; font-size: 11px; line-height: 1;">⭐</span> ÖZEL EDİTÖR ANALİZİ</div>
-  <% } else if (article.category) { %>
-    <div style="font-size: 12px; font-weight: 700; color: #D69E2E; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;"><%= article.category %></div>
-  <% } %>
-  
-  <h1 style="font-family: 'Playfair Display', serif; font-size: 28px; line-height: 1.35; color: #FFFFFF; margin-bottom: 20px; font-weight: 800;"><%= article.title %></h1>
-  
-  <% if (article.cover_image) { %>
-    <div style="width: 100%; height: 300px; border-radius: 8px; overflow: hidden; margin-bottom: 25px; border: 1px solid #2D3748;">
-      <img src="<%= article.cover_image %>" style="width: 100%; height: 100%; object-fit: cover;" crossorigin="anonymous">
-    </div>
-  <% } %>
-  
-  <div class="card-description-block" style="font-size: 15px; line-height: 1.6; color: #E2E8F0; margin-bottom: 30px; font-weight: 400;">
-    <%= article.excerpt || (article.content ? truncate(article.content.replace(/<[^>]*>/g, ''), 250) : '') %>
-  </div>
-  
-  <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #2D3748; padding-top: 20px;">
-    <div style="font-size: 12px; color: #A0AEC0;"><%= formatDate(article.published_at || article.created_at) %></div>
-    <div style="font-size: 13px; font-weight: 600;"><a href="https://europolitika.org" style="color: #FFFFFF; text-decoration: none;">europolitika.org</a></div>
-  </div>
-</div>
+<%
+  // Shown as a badge on the share cards when the piece carries an editor's take.
+  const hasEditorAnalysis = article.editor_analysis || article.category === 'Analiz' || article.category === 'Bülten' || (article.content && article.content.includes('Analiz #'));
+%>
 
 <!-- Hidden container for generating shareable image card (Quote) -->
 <div id="shareCardTemplateQuote" style="position: absolute; left: -9999px; top: -9999px; width: 600px; background-color: #F8F7F4; padding: 50px 40px; box-sizing: border-box; border: 4px solid #C53030; border-radius: 12px; font-family: 'Inter', sans-serif; text-align: center;">
@@ -689,26 +631,6 @@
       if (subheadings.length > 0) {
         console.log('[Digest Share Card] Bülten konuları tespit edildi:', subheadings);
         
-        // Generate Classic list HTML
-        const classicListHtml = `
-          <div style="margin-top: 15px; margin-bottom: 25px; text-align: left;">
-            <div style="font-size: 11px; font-weight: 700; color: #C53030; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif;">BÜLTEN İÇERİĞİ</div>
-            <ul style="margin: 0; padding-left: 20px; list-style-type: square; color: #1A1A1A; font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; line-height: 1.5; display: flex; flex-direction: column; gap: 8px;">
-              ${subheadings.map(sub => `<li>${sub}</li>`).join('')}
-            </ul>
-          </div>
-        `;
-
-        // Generate Dark list HTML
-        const darkListHtml = `
-          <div style="margin-top: 15px; margin-bottom: 25px; text-align: left;">
-            <div style="font-size: 11px; font-weight: 700; color: #D69E2E; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-family: 'Inter', sans-serif;">BÜLTEN İÇERİĞİ</div>
-            <ul style="margin: 0; padding-left: 20px; list-style-type: square; color: #FFFFFF; font-family: 'Playfair Display', serif; font-size: 16px; font-weight: 600; line-height: 1.5; display: flex; flex-direction: column; gap: 8px;">
-              ${subheadings.map(sub => `<li>${sub}</li>`).join('')}
-            </ul>
-          </div>
-        `;
-
         // Generate Quote list HTML (centered, clean)
         const quoteListHtml = `
           <div style="margin-top: 15px; margin-bottom: 25px; text-align: center;">
@@ -730,11 +652,6 @@
         `;
 
         // Replace the description blocks in templates
-        const classicDesc = document.querySelector('#shareCardTemplate .card-description-block');
-        if (classicDesc) classicDesc.innerHTML = classicListHtml;
-        const darkDesc = document.querySelector('#shareCardTemplateDark .card-description-block');
-        if (darkDesc) darkDesc.innerHTML = darkListHtml;
-
         const quoteDesc = document.querySelector('#shareCardTemplateQuote .card-description-block');
         if (quoteDesc) quoteDesc.innerHTML = quoteListHtml;
 
@@ -939,68 +856,74 @@
       return pages.length > 0 ? pages : [htmlContent];
     };
 
+    // Klasik and Karanlık show the bulletin's opening page, so they render the
+    // same card as Tüm Haber, just pinned to page 1 with no page navigation.
+    const FIRST_PAGE_TEMPLATES = ['Classic', 'Dark'];
+    const usesFullCard = (template) => template === 'Full' || FIRST_PAGE_TEMPLATES.includes(template);
+    const templateCardId = (template) => {
+      if (usesFullCard(template)) return 'shareCardTemplateFull';
+      if (template === 'Quote') return 'shareCardTemplateQuote';
+      if (template === 'Tall') return 'shareCardTemplateTall';
+      return 'shareCardTemplateFull';
+    };
+
+    // Put the Full card into the state for one page of the bulletin.
+    const applyFullCardPage = (pageIdx) => {
+      const total = fullArticlePages.length;
+      const leftCol = document.getElementById('fullCardLeftCol');
+      const coverImg = document.getElementById('fullCardCoverImage');
+      const contentBlock = document.getElementById('fullCardContent');
+      const editorBox = document.getElementById('fullCardEditorAnalysis');
+      const pageNumFooter = document.getElementById('fullCardPageNumber');
+
+      if (leftCol) leftCol.style.display = pageIdx === 0 ? 'flex' : 'none';
+      if (coverImg) coverImg.style.display = pageIdx === 0 ? 'block' : 'none';
+      if (contentBlock) contentBlock.innerHTML = fullArticlePages[pageIdx];
+      if (editorBox) editorBox.style.display = pageIdx === total - 1 ? 'block' : 'none';
+      if (pageNumFooter) pageNumFooter.textContent = `Sayfa ${pageIdx + 1} / ${total}`;
+    };
+
+    const ensureFullArticlePages = async () => {
+      if (fullArticlePages.length === 0) {
+        const originalContent = document.querySelector('.article-content').innerHTML;
+        fullArticlePages = await paginateContent(originalContent);
+      }
+      return fullArticlePages;
+    };
+
     const renderActiveTemplate = async () => {
-      let targetId = 'shareCardTemplate';
-      if (activeTemplate === 'Dark') targetId = 'shareCardTemplateDark';
-      if (activeTemplate === 'Quote') targetId = 'shareCardTemplateQuote';
-      if (activeTemplate === 'Tall') targetId = 'shareCardTemplateTall';
-      if (activeTemplate === 'Full') targetId = 'shareCardTemplateFull';
-      
-      const shareCard = document.getElementById(targetId);
-      
-      // Handle Full Template pagination adjustments before render
-      if (activeTemplate === 'Full') {
-        if (fullArticlePages.length === 0) {
-          const originalContent = document.querySelector('.article-content').innerHTML;
-          fullArticlePages = await paginateContent(originalContent);
+      const shareCard = document.getElementById(templateCardId(activeTemplate));
+
+      if (usesFullCard(activeTemplate)) {
+        await ensureFullArticlePages();
+
+        // Only Tüm Haber lets the reader page through the bulletin.
+        const paged = activeTemplate === 'Full';
+        document.getElementById('fullArticlePagination').style.display = paged ? 'flex' : 'none';
+
+        if (paged) {
+          document.getElementById('txtPaginationInfo').textContent = `Sayfa ${currentFullPageIdx + 1} / ${fullArticlePages.length}`;
+
+          // Setup buttons status
+          document.getElementById('btnPrevPage').style.opacity = currentFullPageIdx === 0 ? '0.5' : '1';
+          document.getElementById('btnPrevPage').disabled = currentFullPageIdx === 0;
+          document.getElementById('btnNextPage').style.opacity = currentFullPageIdx === fullArticlePages.length - 1 ? '0.5' : '1';
+          document.getElementById('btnNextPage').disabled = currentFullPageIdx === fullArticlePages.length - 1;
         }
-        
-        document.getElementById('fullArticlePagination').style.display = 'flex';
-        document.getElementById('txtPaginationInfo').textContent = `Sayfa ${currentFullPageIdx + 1} / ${fullArticlePages.length}`;
-        
-        // Setup buttons status
-        document.getElementById('btnPrevPage').style.opacity = currentFullPageIdx === 0 ? '0.5' : '1';
-        document.getElementById('btnPrevPage').disabled = currentFullPageIdx === 0;
-        document.getElementById('btnNextPage').style.opacity = currentFullPageIdx === fullArticlePages.length - 1 ? '0.5' : '1';
-        document.getElementById('btnNextPage').disabled = currentFullPageIdx === fullArticlePages.length - 1;
-        
-        // Adjust template view based on current page
-        const leftCol = document.getElementById('fullCardLeftCol');
-        if (leftCol) {
-          leftCol.style.display = currentFullPageIdx === 0 ? 'flex' : 'none';
-        }
-        
-        const coverImg = document.getElementById('fullCardCoverImage');
-        if (coverImg) {
-          coverImg.style.display = currentFullPageIdx === 0 ? 'block' : 'none';
-        }
-        
-        const contentBlock = document.getElementById('fullCardContent');
-        if (contentBlock) {
-          contentBlock.innerHTML = fullArticlePages[currentFullPageIdx];
-        }
-        
-        const editorBox = document.getElementById('fullCardEditorAnalysis');
-        if (editorBox) {
-          editorBox.style.display = currentFullPageIdx === fullArticlePages.length - 1 ? 'block' : 'none';
-        }
-        
-        const pageNumFooter = document.getElementById('fullCardPageNumber');
-        if (pageNumFooter) {
-          pageNumFooter.textContent = `Sayfa ${currentFullPageIdx + 1} / ${fullArticlePages.length}`;
-        }
+
+        applyFullCardPage(paged ? currentFullPageIdx : 0);
       } else {
         document.getElementById('fullArticlePagination').style.display = 'none';
       }
-      
+
       try {
         previewContainer.innerHTML = '<div style="padding: 40px; font-family: Inter; color: #888; font-size: 14px; text-align: center;">⏳ Kart Hazırlanıyor...</div>';
-        
+
         const canvas = await html2canvas(shareCard, {
           allowTaint: true,
           useCORS: true,
           scale: 2,
-          backgroundColor: activeTemplate === 'Dark' ? '#121212' : '#F8F7F4'
+          backgroundColor: '#F8F7F4'
         });
         
         currentDataUrl = canvas.toDataURL('image/png');
@@ -1125,22 +1048,13 @@
         btnDownload.innerHTML = '⏳ Görseller İndiriliyor...';
         
         const originalPageIdx = currentFullPageIdx;
-        const leftCol = document.getElementById('fullCardLeftCol');
-        const coverImg = document.getElementById('fullCardCoverImage');
-        const contentBlock = document.getElementById('fullCardContent');
-        const editorBox = document.getElementById('fullCardEditorAnalysis');
-        const pageNumFooter = document.getElementById('fullCardPageNumber');
         const shareCard = document.getElementById('shareCardTemplateFull');
-        
+
         try {
           for (let i = 0; i < fullArticlePages.length; i++) {
             // Apply current page values to template for canvas generation
-            if (leftCol) leftCol.style.display = i === 0 ? 'flex' : 'none';
-            if (coverImg) coverImg.style.display = i === 0 ? 'block' : 'none';
-            if (contentBlock) contentBlock.innerHTML = fullArticlePages[i];
-            if (editorBox) editorBox.style.display = i === fullArticlePages.length - 1 ? 'block' : 'none';
-            if (pageNumFooter) pageNumFooter.textContent = `Sayfa ${i + 1} / ${fullArticlePages.length}`;
-            
+            applyFullCardPage(i);
+
             // Critical: Wait for DOM to render modifications before canvas capture
             await sleep(350);
             
@@ -1172,12 +1086,8 @@
           alert('Görseller indirilirken bir hata oluştu.');
         } finally {
           // Restore user's current preview state
-          if (leftCol) leftCol.style.display = originalPageIdx === 0 ? 'flex' : 'none';
-          if (coverImg) coverImg.style.display = originalPageIdx === 0 ? 'block' : 'none';
-          if (contentBlock) contentBlock.innerHTML = fullArticlePages[originalPageIdx];
-          if (editorBox) editorBox.style.display = originalPageIdx === fullArticlePages.length - 1 ? 'block' : 'none';
-          if (pageNumFooter) pageNumFooter.textContent = `Sayfa ${originalPageIdx + 1} / ${fullArticlePages.length}`;
-          
+          applyFullCardPage(originalPageIdx);
+
           btnDownload.disabled = false;
           btnDownload.innerHTML = originalHTML;
         }
@@ -1282,21 +1192,12 @@
 
           if (activeTemplate === 'Full' && fullArticlePages.length > 0) {
             // Multi-page Full template
-            const leftCol = document.getElementById('fullCardLeftCol');
-            const coverImg = document.getElementById('fullCardCoverImage');
-            const contentBlock = document.getElementById('fullCardContent');
-            const editorBox = document.getElementById('fullCardEditorAnalysis');
-            const pageNumFooter = document.getElementById('fullCardPageNumber');
             const shareCard = document.getElementById('shareCardTemplateFull');
             const originalPageIdx = currentFullPageIdx;
 
             for (let i = 0; i < fullArticlePages.length; i++) {
               // Set page content (same logic as image download)
-              if (leftCol) leftCol.style.display = i === 0 ? 'flex' : 'none';
-              if (coverImg) coverImg.style.display = i === 0 ? 'block' : 'none';
-              if (contentBlock) contentBlock.innerHTML = fullArticlePages[i];
-              if (editorBox) editorBox.style.display = i === fullArticlePages.length - 1 ? 'block' : 'none';
-              if (pageNumFooter) pageNumFooter.textContent = `Sayfa ${i + 1} / ${fullArticlePages.length}`;
+              applyFullCardPage(i);
 
               // Critical: Wait for DOM to render modifications before canvas capture
               await sleep(350);
@@ -1325,22 +1226,20 @@
             }
 
             // Restore preview to original page
-            if (leftCol) leftCol.style.display = originalPageIdx === 0 ? 'flex' : 'none';
-            if (coverImg) coverImg.style.display = originalPageIdx === 0 ? 'block' : 'none';
-            if (contentBlock) contentBlock.innerHTML = fullArticlePages[originalPageIdx];
-            if (editorBox) editorBox.style.display = originalPageIdx === fullArticlePages.length - 1 ? 'block' : 'none';
-            if (pageNumFooter) pageNumFooter.textContent = `Sayfa ${originalPageIdx + 1} / ${fullArticlePages.length}`;
+            applyFullCardPage(originalPageIdx);
           } else {
-            // Single-page templates (Classic, Dark, Quote, Tall, or single-page Full)
-            let targetId = 'shareCardTemplate';
-            const bgHex = activeTemplate === 'Dark' ? '#121212' : '#F8F7F4';
-            
-            if (activeTemplate === 'Dark') targetId = 'shareCardTemplateDark';
-            if (activeTemplate === 'Quote') targetId = 'shareCardTemplateQuote';
-            if (activeTemplate === 'Tall') targetId = 'shareCardTemplateTall';
-            if (activeTemplate === 'Full') targetId = 'shareCardTemplateFull';
+            // Single-sheet templates: Klasik and Karanlık (the bulletin's first
+            // page), Alıntı, Uzun, or a Tüm Haber article short enough to fit.
+            const bgHex = '#F8F7F4';
+            const shareCard = document.getElementById(templateCardId(activeTemplate));
 
-            const shareCard = document.getElementById(targetId);
+            // Klasik/Karanlık always export the opening page, whichever page
+            // the preview was last left on.
+            if (FIRST_PAGE_TEMPLATES.includes(activeTemplate) && fullArticlePages.length > 0) {
+              applyFullCardPage(0);
+              await sleep(350);
+            }
+
             const canvas = await html2canvas(shareCard, {
               allowTaint: true,
               useCORS: true,
@@ -1348,7 +1247,7 @@
               backgroundColor: bgHex
             });
 
-            const bgRgb = activeTemplate === 'Dark' ? [18, 18, 18] : [248, 247, 244];
+            const bgRgb = [248, 247, 244];
             const pageRatio = usableHeight / usableWidth;
             const cardRatio = canvas.height / canvas.width;
 
